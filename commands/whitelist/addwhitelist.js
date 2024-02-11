@@ -60,7 +60,7 @@ module.exports = {
         const whitelistRoleId = db.get(whitelistRoleIdKey);
 
         const whitelistedEmbed = new EmbedBuilder()
-            .setColor(0x0099FF).setTitle("Player Whitelisted").setDescription(`Player ${discordUser} has been whitelisted for the server ${serverName}`);
+            .setColor(0x0099FF).setTitle("Player Whitelisted").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
         interaction.editReply({ embeds:[whitelistedEmbed] })
 
         if (whitelistAnnouncementChannelId) {
