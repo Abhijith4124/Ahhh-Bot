@@ -1,6 +1,6 @@
 const {getServerPlayersInfo, kickPlayer, banPlayer} = require("../../utils/palworld/palworldRCONWrapper");
 const {EmbedBuilder, SlashCommandBuilder} = require("discord.js");
-const {logToLogChannel} = require("../../utils/discord/logger");
+const {logToGameLogChannel} = require("../../utils/discord/logger");
 const {PermissionFlagsBits} = require("discord-api-types/v10");
 module.exports = {
     data: new SlashCommandBuilder()
@@ -51,7 +51,7 @@ module.exports = {
         kickEmbed.setTitle("Banned Player");
         kickEmbed.setDescription(`Banned Player with the Steam Id ${playerSteamId} from the server ${serverName}`);
         await interaction.reply({ embeds: [kickEmbed] });
-        logToLogChannel(interaction.client, interaction.guild.id, serverName, "Banned Player", `Banned Player with the Steam Id ${playerSteamId} from the server ${serverName}`);
+        logToGameLogChannel(interaction.client, interaction.guild.id, serverName, "Banned Player", `Banned Player with the Steam Id ${playerSteamId} from the server ${serverName}`);
     },
     async autocomplete(interaction) {
         const db = interaction.client.db;

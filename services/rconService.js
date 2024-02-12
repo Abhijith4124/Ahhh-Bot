@@ -1,6 +1,6 @@
 const {EmbedBuilder} = require("discord.js");
 const {getServerPlayersInfo, kickPlayer, broadcastMessage} = require("../utils/palworld/palworldRCONWrapper");
-const {logToLogChannel, logToGameLogChannel} = require("../utils/discord/logger");
+const {logToGameLogChannel} = require("../utils/discord/logger");
 
 const config = require("../config.json");
 
@@ -275,12 +275,12 @@ async function startRCONService(client, db) {
                         }
 
                         for (const newPlayer of newPlayersList) {
-                            logToLogChannel(client, guildId, serverName, "Player Joined", `${newPlayer.name} has Joined the Server!`);
+                            logToGameLogChannel(client, guildId, serverName, "Player Joined", `${newPlayer.name} has Joined the Server!`);
                             broadcastMessage(host, RCONPort, password, `${newPlayer.name} has Joined the Server!`);
                         }
 
                         for (const leftPlayer of leftPlayersList) {
-                            logToLogChannel(client, guildId, serverName, "Player Left", `${leftPlayer.name} has Left the Server!`);
+                            logToGameLogChannel(client, guildId, serverName, "Player Left", `${leftPlayer.name} has Left the Server!`);
                             broadcastMessage(host, RCONPort, password, `${leftPlayer.name} has Left the Server!`);
                         }
                     }else {
