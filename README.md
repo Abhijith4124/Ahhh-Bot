@@ -3,6 +3,7 @@
 
 
 # Ahhh Bot - Palworld Discord Bot | Whitelist | Join/Leave Messages | Automatic Roles and Announcement
+[![AddBotToServer](https://raw.githubusercontent.com/Abhijith4124/SomeSvgImages/main/discord_add_to_server.svg?sanitized=true)](https://discord.com/api/oauth2/authorize?client_id=1205567259985190986&permissions=274877908992&scope=bot)
 
 AhhhBot is designed to enhance your Palworld gaming experience by allowing you to manage your Palworld Game Server directly through Discord. With a range of features including whitelisting, in-game join/leave messages, player management (ban, kick), and broadcast messaging capabilities, this bot streamlines server administration and communication for Palworld players.
 
