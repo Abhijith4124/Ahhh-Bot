@@ -19,11 +19,13 @@ module.exports = {
         const gameLogChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_GameLogChannelId`;
         const statusChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_StatusChannelId`;
         const whitelistAnnouncementChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistAnnouncementChannelId`;
+        const whitelistLogChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistLogChannelId`;
         const whitelistRoleIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistRoleId`;
 
         const gameLogChannelId = db.get(gameLogChannelIdKey);
         const statusChannelId = db.get(statusChannelIdKey);
         const whitelistAnnouncementChannelId = db.get(whitelistAnnouncementChannelIdKey);
+        const whitelistLogChannelId = db.get(whitelistLogChannelIdKey);
         const whitelistRoleId = db.get(whitelistRoleIdKey);
 
 
@@ -54,6 +56,15 @@ module.exports = {
             whitelistAnnouncementChannelMenu.setDefaultChannels([whitelistAnnouncementChannelId])
         }
 
+        const whitelistLogChannelMenu = new ChannelSelectMenuBuilder()
+            .setCustomId("whitelistlogchannel")
+            .setPlaceholder("#whitelistlogchannel")
+            .setChannelTypes(ChannelType.GuildText);
+
+        if (whitelistLogChannelId) {
+            whitelistLogChannelMenu.setDefaultChannels([whitelistLogChannelId])
+        }
+
         const whitelistRoleIdMenu = new RoleSelectMenuBuilder()
             .setCustomId("whitelistroleid")
             .setPlaceholder("@whitelistrole");
@@ -65,9 +76,10 @@ module.exports = {
         const row1 = new ActionRowBuilder().addComponents(gameLogChannelMenu);
         const row2 = new ActionRowBuilder().addComponents(statusChannelMenu);
         const row3 = new ActionRowBuilder().addComponents(whitelistAnnouncementChannelMenu);
-        const row4 = new ActionRowBuilder().addComponents(whitelistRoleIdMenu);
+        const row4 = new ActionRowBuilder().addComponents(whitelistLogChannelMenu);
+        const row5 = new ActionRowBuilder().addComponents(whitelistRoleIdMenu);
 
-        const response = await interaction.reply({ content: `Configure Discord Server for ${serverName} `, components: [row1, row2, row3, row4] });
+        const response = await interaction.reply({ content: `Configure Discord Server for ${serverName} `, components: [row1, row2, row3, row4, row5] });
 
         const channelSelectionCollector = response.createMessageComponentCollector({ componentType: ComponentType.ChannelSelect, time: 3_600_000 });
         const roleSelectionCollector = response.createMessageComponentCollector({ componentType: ComponentType.RoleSelect, time: 3_600_000 });
@@ -97,6 +109,15 @@ module.exports = {
                 if (whiteListAnnouncementChannelId) {
                     db.set(whitelistAnnouncementChannelIdKey, whiteListAnnouncementChannelId);
                     await menuInteraction.reply({ content: `Whitelist Announcement Channel Set to <#${whiteListAnnouncementChannelId}>` });
+                }
+            }
+
+            if (menuInteraction.customId === "whitelistlogchannel") {
+                const whiteListLogChannelId = menuInteraction.values[0];
+
+                if (whiteListLogChannelId) {
+                    db.set(whitelistLogChannelIdKey, whiteListLogChannelId);
+                    await menuInteraction.reply({ content: `Whitelist Announcement Channel Set to <#${whiteListLogChannelId}>` });
                 }
             }
         });

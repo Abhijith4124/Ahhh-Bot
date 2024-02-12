@@ -84,11 +84,13 @@ module.exports = {
         const gameLogChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_GameLogChannelId`;
         const statusChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_StatusChannelId`;
         const whitelistAnnouncementChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistAnnouncementChannelId`;
+        const whitelistLogChannelIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistLogChannelId`;
         const whitelistRoleIdKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistRoleId`;
 
         db.delete(gameLogChannelIdKey);
         db.delete(statusChannelIdKey);
         db.delete(whitelistAnnouncementChannelIdKey);
+        db.delete(whitelistLogChannelIdKey);
         db.delete(whitelistRoleIdKey);
 
         db.delete(guildPalServerWhitelistEnabledKey);

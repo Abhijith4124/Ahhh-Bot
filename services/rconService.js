@@ -1,6 +1,6 @@
 const {EmbedBuilder} = require("discord.js");
 const {getServerPlayersInfo, kickPlayer, broadcastMessage} = require("../utils/palworld/palworldRCONWrapper");
-const {logToGameLogChannel} = require("../utils/discord/logger");
+const {logToGameLogChannel, logToWhitelistLogChannel} = require("../utils/discord/logger");
 
 const config = require("../config.json");
 
@@ -263,7 +263,7 @@ async function startRCONService(client, db) {
                                     let nonWhitelistedPlayerSteamId = nonWhitelistedPlayer.steamid;
                                     let nonWhitelistedPlayerUId = nonWhitelistedPlayer.playeruid;
 
-                                    logToGameLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
+                                    logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
                                         `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
                                             and UID \`${nonWhitelistedPlayerUId}\` has been Kicked from the server.`);
                                 }
