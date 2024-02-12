@@ -203,6 +203,7 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Skipping Server Check since server is offline...`);
                         }
+                        serverData = defaultServerData;
                         return
                     }
 

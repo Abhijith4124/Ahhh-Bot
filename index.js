@@ -5,6 +5,7 @@ const { Client, Events, GatewayIntentBits, REST, Routes, Collection} = require('
 
 const config = require('./config.json');
 const {startRCONService} = require("./services/rconService");
+const {cleanUp} = require("./utils/cleaner/cleaner");
 const db = new JSONdb('./data/data.json');
 
 const client = new Client({
@@ -117,4 +118,5 @@ client.once(Events.ClientReady, readyClient => {
     startRCONService(client, db);
 });
 
+cleanUp(db);
 client.login(config.token);
