@@ -112,6 +112,11 @@ module.exports = {
                 return;
             }
 
+            if (guildServers.length > 10) {
+                guildServers = guildServers.filter(guildServer => guildServer.serverName.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                guildServers = guildServers.slice(0, 11);
+            }
+
             await interaction.respond(guildServers.map(server => ({ name: server.serverName, value: server.serverName }) ));
         }
     }

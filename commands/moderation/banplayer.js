@@ -64,6 +64,11 @@ module.exports = {
                 return;
             }
 
+            if (guildServers.length > 10) {
+                guildServers = guildServers.filter(guildServer => guildServer.serverName.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                guildServers = guildServers.slice(0, 11);
+            }
+
             await interaction.respond(guildServers.map(server => ({ name: server.serverName, value: server.serverName }) ));
         }
 
@@ -80,9 +85,13 @@ module.exports = {
             let serverPlayersInfoResponse = await getServerPlayersInfo(server.host, server.RCONPort, server.password);
 
             if (serverPlayersInfoResponse.status === "success") {
-                const playerList = serverPlayersInfoResponse.data.playerList.filter(player => player.playeruid !== "00000000");
+                let playerList = serverPlayersInfoResponse.data.playerList.filter(player => player.playeruid !== "00000000");
 
                 if (playerList.length > 0) {
+                    if (playerList.length > 10) {
+                        playerList = playerList.filter(player => player.steamid.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                        playerList = playerList.slice(0, 11);
+                    }
                     await interaction.respond(playerList.map(player => ({ name: player.steamid, value: player.steamid }) ));
                 }
             }

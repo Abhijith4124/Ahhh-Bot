@@ -79,14 +79,28 @@ module.exports = {
                 return;
             }
 
+            if (guildServers.length > 10) {
+                guildServers = guildServers.filter(guildServer => guildServer.serverName.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                guildServers = guildServers.slice(0, 11);
+            }
+
             await interaction.respond(guildServers.map(server => ({ name: server.serverName, value: server.serverName }) ));
         }
 
         if (focusedOption.name === "steamid") {
             let serverName = interaction.options.getString("server");
 
+            if (!serverName) {
+                return;
+            }
+
             const whitelistedPlayersListKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
             let whitelistedPlayers = db.get(whitelistedPlayersListKey);
+
+            if (whitelistedPlayers.length > 10) {
+                whitelistedPlayers = whitelistedPlayers.filter(player => player.steamid.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                whitelistedPlayers = whitelistedPlayers.slice(0, 11);
+            }
 
             await interaction.respond(whitelistedPlayers.map(player => ({ name: player.steamid, value: player.steamid })));
         }
@@ -94,8 +108,17 @@ module.exports = {
         if (focusedOption.name === "playeruid") {
             let serverName = interaction.options.getString("server");
 
+            if (!serverName) {
+                return;
+            }
+
             const whitelistedPlayersListKey = `${interaction.guild.id}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
             let whitelistedPlayers = db.get(whitelistedPlayersListKey);
+
+            if (whitelistedPlayers.length > 10) {
+                whitelistedPlayers = whitelistedPlayers.filter(player => player.playeruid.toLowerCase().includes(focusedOption.value.toLowerCase()));
+                whitelistedPlayers = whitelistedPlayers.slice(0, 11);
+            }
 
             await interaction.respond(whitelistedPlayers.map(player => ({ name: player.playeruid, value: player.playeruid })));
         }
