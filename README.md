@@ -26,6 +26,7 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
     - **Gamelog Channel:** Set a channel to receive game logs such as player join/leave events.
     - **Status Channel:** Set a channel for server status updates.
     - **Whitelist Announcement Channel:** Set a channel for whitelist announcements.
+    - **Whitelist Log Channel:** Set a channel for whitelist logs.
     - **Whitelist Role:** Assign a role to whitelisted users.
 
 ### Managing Palworld Servers
