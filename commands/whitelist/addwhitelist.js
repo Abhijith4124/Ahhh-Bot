@@ -65,13 +65,11 @@ module.exports = {
 
         if (whitelistAnnouncementChannelId) {
             const announcementChannel = await interaction.client.channels.cache.get(whitelistAnnouncementChannelId);
-            if (announcementChannel) {
-                if (whitelistRoleId && discordUser) {
-                    const role = interaction.guild.roles.cache.get(whitelistRoleId);
-                    if (role) {
-                        let guildUser = await interaction.guild.members.fetch(discordUser);
-                        await guildUser.roles.add(role);
-                    }
+            if (announcementChannel && whitelistRoleId && discordUser) {
+                const role = interaction.guild.roles.cache.get(whitelistRoleId);
+                if (role) {
+                    let guildUser = await interaction.guild.members.fetch(discordUser);
+                    await guildUser.roles.add(role);
                 }
                 const whitelistedAnnouncementEmbed = new EmbedBuilder()
                     .setColor(0x0099FF).setTitle("Player Whitelisted").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
