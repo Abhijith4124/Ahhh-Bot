@@ -6,14 +6,15 @@ async function logToGameLogChannel(client, guild, serverName, title, message) {
         const gameLogChannelIdKey = `${guild}_${serverName.replaceAll(" ", "_")}_GameLogChannelId`;
         const gameLogChannelId = client.db.get(gameLogChannelIdKey);
 
-        if (!client.guilds.cache.get(guild).members.me.permissionsIn(gameLogChannelId).has("SendMessages")) {
-            if (config.debug) {
-                console.log(`[LOGGER]: Permission Denied to Log Game Logs to ${serverName}`);
-            }
-            return;
-        }
-
         if (gameLogChannelId) {
+
+            if (!client.guilds.cache.get(guild).members.me.permissionsIn(gameLogChannelId).has("SendMessages")) {
+                if (config.debug) {
+                    console.log(`[LOGGER]: Permission Denied to Log Game Logs to ${serverName}`);
+                }
+                return;
+            }
+
             const channel = await client.channels.fetch(gameLogChannelId);
             if (channel) {
                 const logEmbed = new EmbedBuilder().setColor("#ff0000").setTitle(title).setDescription(message);
@@ -31,14 +32,15 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
         const whitelistLogChannelIdKey = `${guild}_${serverName.replaceAll(" ", "_")}_WhitelistLogChannelId`;
         const whitelistLogChannelId = client.db.get(whitelistLogChannelIdKey);
 
-        if (!client.guilds.cache.get(guild).members.me.permissionsIn(whitelistLogChannelId).has("SendMessages")) {
-            if (config.debug) {
-                console.log(`[LOGGER]: Permission Denied to Log Whitelist Message to ${serverName}`);
-            }
-            return;
-        }
-
         if (whitelistLogChannelId) {
+
+            if (!client.guilds.cache.get(guild).members.me.permissionsIn(whitelistLogChannelId).has("SendMessages")) {
+                if (config.debug) {
+                    console.log(`[LOGGER]: Permission Denied to Log Whitelist Message to ${serverName}`);
+                }
+                return;
+            }
+
             const channel = await client.channels.fetch(whitelistLogChannelId);
             if (channel) {
                 const logEmbed = new EmbedBuilder().setColor("#ff0000").setTitle(title).setDescription(message);
