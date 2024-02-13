@@ -323,12 +323,15 @@ async function startRCONService(client, db) {
                         let whitelistedPlayerUIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.playeruid);
 
                         //Checking for Players who are not whitelisted and are online
-                        let nonWhitelistedPlayers = newPlayersList.filter(
+                        let nonWhitelistedPlayers = serverData.playerList.filter(
                             newPlayer => !whitelistedPlayerSteamIds.includes(newPlayer.steamid) && !whitelistedPlayerUIds.includes(newPlayer.playeruid));
 
-                        newPlayersList = newPlayersList.filter(newPlayer => whitelistedPlayerSteamIds.includes(newPlayer.steamid) && whitelistedPlayerUIds.includes(newPlayer.playeruid));
-
-                        leftPlayersList = leftPlayersList.filter(leftPlayer => whitelistedPlayerSteamIds.includes(leftPlayer.steamid) && whitelistedPlayerUIds.includes(leftPlayer.playeruid));
+                        //Removing Non Whitelisted players from the list, we do not want to show join/left messages for non whitelisted players
+                        newPlayersList = newPlayersList.filter(newPlayer => whitelistedPlayerSteamIds.includes(newPlayer.steamid)
+                            && whitelistedPlayerUIds.includes(newPlayer.playeruid));
+                        
+                        leftPlayersList = leftPlayersList.filter(leftPlayer => whitelistedPlayerSteamIds.includes(leftPlayer.steamid)
+                            && whitelistedPlayerUIds.includes(leftPlayer.playeruid));
 
                         if (nonWhitelistedPlayers.length > 0) {
                             //Non Whitelisted Players are online
