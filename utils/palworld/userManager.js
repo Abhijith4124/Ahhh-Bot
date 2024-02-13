@@ -1,6 +1,5 @@
 const {EmbedBuilder} = require("discord.js");
 const {kickPlayer, banPlayer} = require("./palworldRCONWrapper");
-const {logToGameLogChannel} = require("../discord/logger");
 
 async function kickUser(interaction, data) {
     try {
@@ -32,7 +31,7 @@ async function kickUser(interaction, data) {
         kickEmbed.setTitle("Kicked Player");
         kickEmbed.setDescription(`Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
         await interaction.editReply({ embeds: [kickEmbed] });
-        await logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Kicked Player", `Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        await interaction.client.logger.logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Kicked Player", `Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
     }catch (e) {
         console.error(e)
     }
@@ -68,7 +67,7 @@ async function banUser(interaction, data) {
         kickEmbed.setTitle("Banned Player");
         kickEmbed.setDescription(`Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
         await interaction.editReply({ embeds: [kickEmbed] });
-        await logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Banned Player", `Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        await interaction.client.logger.logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Banned Player", `Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
     }catch (e) {
         console.error(e)
     }

@@ -8,6 +8,7 @@ const {startRCONService} = require("./services/rconService");
 const {cleanUp} = require("./utils/cleaner/cleaner");
 const {ActivityType} = require("discord-api-types/v10");
 const db = new JSONdb('./data/data.json');
+const logger = require('./utils/discord/logger');
 
 const client = new Client({
     intents: [
@@ -17,6 +18,7 @@ const client = new Client({
 
 client.commands = new Collection();
 client.db = db;
+client.logger = logger;
 
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);

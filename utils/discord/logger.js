@@ -1,7 +1,6 @@
 const {EmbedBuilder, ActionRowBuilder, ButtonBuilder} = require("discord.js");
 const config = require("../../config.json");
 const {ButtonStyle, ComponentType} = require("discord-api-types/v10");
-const {addWhiteList} = require("../../commands/whitelist/addwhitelist");
 const {whitelistPlayer} = require("../palworld/whitelistManager");
 const {banUser} = require("../palworld/userManager");
 
@@ -115,7 +114,7 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
                 collector.on('collect', async (interaction) => {
                     await interaction.deferReply();
                     if (interaction.customId === "whitelistplayer") {
-
+                        
                         await whitelistPlayer(interaction, {
                             serverName:serverName,
                             inGameName: playerName,

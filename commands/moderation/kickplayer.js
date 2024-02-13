@@ -1,6 +1,5 @@
 const {getServerPlayersInfo, kickPlayer} = require("../../utils/palworld/palworldRCONWrapper");
-const {EmbedBuilder, SlashCommandBuilder} = require("discord.js");
-const {logToGameLogChannel} = require("../../utils/discord/logger");
+const {SlashCommandBuilder} = require("discord.js");
 const {PermissionFlagsBits} = require("discord-api-types/v10");
 module.exports = {
     data: new SlashCommandBuilder()

@@ -74,7 +74,9 @@ async function removeWhitelist(interaction, data) {
         const guildId = interaction.guild.id;
 
         const whitelistedPlayersListKey = `${guildId}_${data.serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
-        const whitelistRoleId = `${guildId}_${data.serverName.replaceAll(" ", "_")}_WhitelistRoleId`;
+        const whitelistRoleIdKey = `${guildId}_${data.serverName.replaceAll(" ", "_")}_WhitelistRoleId`;
+
+        const whitelistRoleId = db.get(whitelistRoleIdKey);
 
         let whitelistedPlayers = db.get(whitelistedPlayersListKey);
 
