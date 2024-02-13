@@ -77,7 +77,22 @@ module.exports = {
                     await guildUser.roles.add(role);
                 }
                 const whitelistedAnnouncementEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF).setTitle("Player Whitelisted!").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
+                .setTitle("Welcome to **AHHH World**🌴")
+                .setDescription("Congratulations 🎉")
+                .addFields(
+                  {
+                    name: "_You have been whitelisted to our Palworld server_ 🦖",
+                    value: "Enjoy your stay 🙃",
+                    inline: false
+                  },
+                )
+                .setImage("https://i.ibb.co/bmKNgq6/In-Shot-20240210-132746448.jpg")
+                .setColor("#24ffff")
+                .setFooter({
+                  text: "Ahhh bot",
+                })
+                .setTimestamp();
+    
                 await announcementChannel.send({ embeds: [whitelistedAnnouncementEmbed] });
             }
         }

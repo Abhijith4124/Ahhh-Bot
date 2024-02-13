@@ -153,39 +153,44 @@ async function startRCONService(client, db) {
                     }
 
                     const serverStatusEmbed = new EmbedBuilder()
-                        .setTitle("PalWord Server Status")
-                        .addFields(
-                            {
-                                name: "**Server IP:**",
-                                value: `\`\`\`${host}:${port}\`\`\``,
-                                inline: false
-                            },
-                            {
-                                name: "Status:",
-                                value: `${(serverData.online ? "✅Online" : "❌Offline")}`,
-                                inline: true
-                            },
-                            {
-                                name: "Online Players:",
-                                value: `${serverData.currentPlayers}/${serverData.maximumPlayers}`,
-                                inline: true
-                            },
-                            {
-                                name: "Players Peak:",
-                                value: `${serverData.peakPlayers}`,
-                                inline: true
-                            },
-                            {
-                                name: "Whitelisted:",
-                                value: `\`${whitelistEnabled}\``,
-                                inline: true
-                            },
-                            {
-                                name: "Player List:",
-                                value: (serverData.playerList.length > 0 ? serverData.playerList.map(playerData => `\`${playerData.name}\``).join("\n") : "No Players"),
-                                inline: false
-                            },
-                        );
+                    .setTitle("📊 **Palworld Server Status**")
+                    .addFields(
+                        {
+                            name: "Server IP:",
+                            value: `\`\`\`${host}:${port}\`\`\``,
+                            inline: false
+                        },
+                        {
+                            name: "__Status__",
+                            value: `${(serverData.online ? "✅Online" : "❌Offline")}`,
+                            inline: true
+                        },
+                        {
+                          name: "__Online Players__",
+                          value: `${serverData.currentPlayers}/${serverData.maximumPlayers}`,
+                          inline: true
+                        },
+                        {
+                          name: "__Players Peak__",
+                          value: `${serverData.peakPlayers}`,
+                          inline: true
+                        },
+                        {
+                          name: "Whitelist Status",
+                          value: `\`${whitelistEnabled}\``,
+                          inline: false
+                        },
+                        {
+                          name: "__Player List__",
+                          value: (serverData.playerList.length > 0 ? serverData.playerList.map(playerData => `${playerData.name}`).join("\n") : "No Players"),
+                          inline: false
+                        },
+                    )
+                    .setColor("#1adb93")
+                    .setFooter({
+                      text: "Ahhh bot",
+                    })
+                    .setTimestamp();
 
                     let statusMessageEdited = false;
                     let statusMessageIdKey = `${statusChannelId}_${serverName.replaceAll(" ", "_")}_StatusMessageId`;

@@ -17,7 +17,15 @@ async function logToGameLogChannel(client, guild, serverName, title, message) {
 
             const channel = await client.channels.fetch(gameLogChannelId);
             if (channel) {
-                const logEmbed = new EmbedBuilder().setColor("#ff0000").setTitle(title).setDescription(message);
+                const logEmbed = new EmbedBuilder()
+                .setTitle(title)
+                .setDescription(message)
+                .setColor("#00ff00")
+                .setFooter({
+                  text: "Ahhh bot",
+                })
+                .setTimestamp();
+                
                 await channel.send({embeds: [logEmbed]});
             }
 
@@ -27,7 +35,7 @@ async function logToGameLogChannel(client, guild, serverName, title, message) {
     }
 }
 
-async function logToWhitelistLogChannel(client, guild, serverName, title, message) {
+async function logToWhitelistLogChannel(client, guild, serverName, title, message, playerName, steamId, playerUid) {
     try {
         const whitelistLogChannelIdKey = `${guild}_${serverName.replaceAll(" ", "_")}_WhitelistLogChannelId`;
         const whitelistLogChannelId = client.db.get(whitelistLogChannelIdKey);
@@ -43,7 +51,32 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
 
             const channel = await client.channels.fetch(whitelistLogChannelId);
             if (channel) {
-                const logEmbed = new EmbedBuilder().setColor("#ff0000").setTitle(title).setDescription(message);
+                const logEmbed = new EmbedBuilder()
+                .setTitle(title)
+                .setDescription(message)
+                .addFields(
+                  {
+                    name: "__Player Name__",
+                    value: `\`\`\`\n${playerName}\n\`\`\``,
+                    inline: false
+                  },
+                  {
+                    name: "__Steam ID__",
+                    value: `\`\`\`\n${steamId}\n\`\`\``,
+                    inline: false
+                  },
+                  {
+                    name: "__Player UID__",
+                    value: `\`\`\`\n${playerUid}\n\`\`\``,
+                    inline: false
+                  },
+                )
+                .setColor("#ffff00")
+                .setFooter({
+                  text: "Ahhh bot",
+                })
+                .setTimestamp();
+                
                 await channel.send({embeds: [logEmbed]});
             }
 
