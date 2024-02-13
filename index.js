@@ -106,7 +106,7 @@ const rest = new REST().setToken(config.token);
             .catch(console.error);
 
         await rest.put(
-            Routes.applicationCommands(config.botApplicationId),
+            Routes.applicationGuildCommands(config.botApplicationId, "1203385125480435735"),
             { body: client.commands.map(command => command.data.toJSON()) }
         );
     } catch (error) {

@@ -50,7 +50,7 @@ module.exports = {
 
         if (whitelistedPlayers.find(player => player.steamid === steamId && player.playeruid === playerUid)) {
             const alreadyWhitelistedEmbed = new EmbedBuilder()
-                .setColor(0x0099FF).setTitle("Player is already whitelisted").setDescription("Player is already whitelisted");
+                .setColor(0x0099FF).setTitle(`Player already whitelisted!`).setDescription(`${inGameName} is already whitelisted`);
             await interaction.editReply({ embeds: [alreadyWhitelistedEmbed] });
             return;
         }
@@ -65,7 +65,7 @@ module.exports = {
         const whitelistRoleId = db.get(whitelistRoleIdKey);
 
         const whitelistedEmbed = new EmbedBuilder()
-            .setColor(0x0099FF).setTitle("Player Whitelisted").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
+            .setColor(0x0099FF).setTitle("Player Whitelisted!").setDescription(`Player ${inGameName} has been whitelisted for the server ${serverName}`);
         interaction.editReply({ embeds:[whitelistedEmbed] })
 
         if (whitelistAnnouncementChannelId) {
@@ -77,7 +77,7 @@ module.exports = {
                     await guildUser.roles.add(role);
                 }
                 const whitelistedAnnouncementEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF).setTitle("Player Whitelisted").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
+                    .setColor(0x0099FF).setTitle("Player Whitelisted!").setDescription(`Player ${discordUser ? discordUser : ""} has been whitelisted for the server ${serverName}`);
                 await announcementChannel.send({ embeds: [whitelistedAnnouncementEmbed] });
             }
         }
