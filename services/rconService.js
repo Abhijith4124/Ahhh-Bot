@@ -329,10 +329,13 @@ async function startRCONService(client, db) {
                         let migratedWhitelistedPlayerList = [];
                         for (const whitelistedPlayer of whitelistedPlayers) {
                             if (!whitelistedPlayer.name) {
-                                whitelistedPlayer.name = serverData.playerList
-                                    .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid).name;
-                            }
+                                const whitelistedPlayerCurrentData = serverData.playerList
+                                    .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid);
 
+                                if (whitelistedPlayerCurrentData) {
+                                    whitelistedPlayer.name = whitelistedPlayerCurrentData.name;
+                                }
+                            }
                             migratedWhitelistedPlayerList.push(whitelistedPlayer);
                         }
                         whitelistedPlayers = migratedWhitelistedPlayerList;
