@@ -20,38 +20,15 @@ module.exports = {
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
     async execute(interaction) {
-        const db = interaction.client.db;
+        await interaction.deferReply();
 
         let serverName = interaction.options.getString("server");
         let playerSteamId = interaction.options.getString("playersteamid");
 
-        const guildServersKey = `${interaction.guild.id}_PalServers`;
-        let guildServers = db.get(guildServersKey);
-
-        const kickEmbed = new EmbedBuilder().setColor(0x0099FF);
-
-        if (!guildServers) {
-            kickEmbed.setTitle("Server Does not Exist");
-            kickEmbed.setDescription("You have not added any PalWorld Servers to the bot");
-            await interaction.reply({ embeds: [kickEmbed] });
-            return;
-        }
-
-        const server = guildServers.find(server => server.serverName === serverName);
-
-        if (!server) {
-            kickEmbed.setTitle("Server Does not Exist");
-            kickEmbed.setDescription("Invalid Server to Kick Player from");
-            await interaction.reply({ embeds: [kickEmbed] });
-            return;
-        }
-
-        kickPlayer(server.host, server.RCONPort, server.password, playerSteamId);
-
-        kickEmbed.setTitle("Kicked Player");
-        kickEmbed.setDescription(`Kicked Player with the Steam Id ${playerSteamId} from the server ${serverName}`);
-        await interaction.reply({ embeds: [kickEmbed] });
-        logToGameLogChannel(interaction.client, interaction.guild.id, serverName, "Kicked Player", `Kicked Player with the Steam Id ${playerSteamId} from the server ${serverName}`);
+        await kickPlayer(interaction, {
+            serverName: serverName,
+            playerSteamId: playerSteamId
+        })
     },
     async autocomplete(interaction) {
         const db = interaction.client.db;

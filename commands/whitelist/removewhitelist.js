@@ -1,6 +1,7 @@
 const {SlashCommandBuilder, EmbedBuilder} = require("discord.js");
 const config = require('../../config.json');
 const {PermissionFlagsBits} = require("discord-api-types/v10");
+const {removeWhitelist} = require("../../utils/palworld/whitelistManager");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -28,41 +29,11 @@ module.exports = {
         const playerName = interaction.options.getString("playername");
         const discordUser = interaction.options.getUser("discorduser");
 
-        const db = interaction.client.db;
-        const guildId = interaction.guild.id;
-
-        const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
-        const whitelistRoleId = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistRoleId`;
-
-        let whitelistedPlayers = db.get(whitelistedPlayersListKey);
-
-        if (!whitelistedPlayers) {
-            whitelistedPlayers = [];
-        }
-
-        let whitelistedPlayerIndex = whitelistedPlayers.findIndex(player => player.name === playerName);
-
-        if (whitelistedPlayerIndex === -1) {
-            await interaction.editReply({ content: "Player is not whitelisted" });
-            return;
-        }
-
-        let whitelistedPlayer = whitelistedPlayers[whitelistedPlayerIndex];
-
-        whitelistedPlayers.splice(whitelistedPlayerIndex, 1);
-        db.set(whitelistedPlayersListKey, whitelistedPlayers);
-
-        if (whitelistRoleId && discordUser) {
-            const role = interaction.guild.roles.cache.get(whitelistRoleId);
-            if (role) {
-                let guildUser = await interaction.guild.members.fetch(discordUser);
-                await guildUser.roles.remove(role);
-            }
-        }
-
-        const playerRemovedFromWhitelistEmbed = new EmbedBuilder()
-            .setColor(0x0099FF).setTitle("Player Whitelist Removed!").setDescription(`Player ${whitelistedPlayer.name ? whitelistedPlayer.name : ""} has been removed from the whitelist for server ${serverName}`);
-        interaction.editReply({ embeds: [playerRemovedFromWhitelistEmbed] });
+        await removeWhitelist(interaction, {
+            serverName: serverName,
+            playerName: playerName,
+            discordUser: discordUser
+        })
     },
     async autocomplete(interaction) {
         const db = interaction.client.db;

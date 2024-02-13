@@ -153,39 +153,44 @@ async function startRCONService(client, db) {
                     }
 
                     const serverStatusEmbed = new EmbedBuilder()
-                        .setTitle("PalWord Server Status")
-                        .addFields(
-                            {
-                                name: "**Server IP:**",
-                                value: `\`\`\`${host}:${port}\`\`\``,
-                                inline: false
-                            },
-                            {
-                                name: "Status:",
-                                value: `${(serverData.online ? "✅Online" : "❌Offline")}`,
-                                inline: true
-                            },
-                            {
-                                name: "Online Players:",
-                                value: `${serverData.currentPlayers}/${serverData.maximumPlayers}`,
-                                inline: true
-                            },
-                            {
-                                name: "Players Peak:",
-                                value: `${serverData.peakPlayers}`,
-                                inline: true
-                            },
-                            {
-                                name: "Whitelisted:",
-                                value: `\`${whitelistEnabled}\``,
-                                inline: true
-                            },
-                            {
-                                name: "Player List:",
-                                value: (serverData.playerList.length > 0 ? serverData.playerList.map(playerData => `\`${playerData.name}\``).join("\n") : "No Players"),
-                                inline: false
-                            },
-                        );
+                    .setTitle("📊 **Palworld Server Status**")
+                    .addFields(
+                        {
+                            name: "Server IP:",
+                            value: `\`\`\`${host}:${port}\`\`\``,
+                            inline: false
+                        },
+                        {
+                            name: "__Status__",
+                            value: `${(serverData.online ? "✅Online" : "❌Offline")}`,
+                            inline: true
+                        },
+                        {
+                          name: "__Online Players__",
+                          value: `${serverData.currentPlayers}/${serverData.maximumPlayers}`,
+                          inline: true
+                        },
+                        {
+                          name: "__Players Peak__",
+                          value: `${serverData.peakPlayers}`,
+                          inline: true
+                        },
+                        {
+                          name: "Whitelist Status",
+                          value: `\`${whitelistEnabled}\``,
+                          inline: false
+                        },
+                        {
+                          name: "__Player List__",
+                          value: (serverData.playerList.length > 0 ? serverData.playerList.map(playerData => `${playerData.name}`).join("\n") : "No Players"),
+                          inline: false
+                        },
+                    )
+                    .setColor("#1adb93")
+                    .setFooter({
+                      text: "Ahhh bot",
+                    })
+                    .setTimestamp();
 
                     let statusMessageEdited = false;
                     let statusMessageIdKey = `${statusChannelId}_${serverName.replaceAll(" ", "_")}_StatusMessageId`;
@@ -309,17 +314,76 @@ async function startRCONService(client, db) {
                         return;
                     }
 
-                    let previousPlayerSteamIds = previousPlayersList.map(previousPlayer => previousPlayer.steamid);
-                    let previousPlayerUIds = previousPlayersList.map(previousPlayer => previousPlayer.playeruid);
+                    //Sorting Server Players
+                    const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
+                    let whitelistedPlayers = db.get(whitelistedPlayersListKey);
 
-                    let currentPlayerSteamIds = serverData.playerList.map(currentPlayer => currentPlayer.steamid);
-                    let currentPlayerUIds = serverData.playerList.map(currentPlayer => currentPlayer.playeruid);
+                    let nonWhitelistedPlayers = [];
+                    let nameSpoofingPlayers = [];
 
-                    let newPlayersList = serverData.playerList.filter(player => !previousPlayerSteamIds.includes(player.steamid)
-                        && !previousPlayerUIds.includes(player.playeruid));
+                    let joinedPlayers = [];
+                    let leftPlayers = [];
 
-                    let leftPlayersList = previousPlayersList.filter(previousPlayer => !currentPlayerSteamIds.includes(previousPlayer.steamid)
-                        && !currentPlayerUIds.includes(previousPlayer.playeruid));
+                    let currentWhitelistedPlayers = [];
+
+                    for (const serverPlayer of serverData.playerList) {
+                        const whitelistedPlayerData = whitelistedPlayers.find(whitelistedPlayer => whitelistedPlayer.steamid === serverPlayer.steamid
+                            && whitelistedPlayer.playeruid === serverPlayer.playeruid);
+
+                        if (!whitelistedPlayerData) {
+                            //User Is not whitelisted
+                            nonWhitelistedPlayers.push(serverPlayer);
+                            continue;
+                        }
+
+                        if (whitelistedPlayerData && whitelistedPlayerData.name !== serverPlayer.name) {
+                            //Player is Name Spoofing
+                            nameSpoofingPlayers.push({...serverPlayer, originalName: whitelistedPlayerData.name});
+                            continue;
+                        }
+
+                        currentWhitelistedPlayers.push(serverPlayer);
+
+                        if (!previousPlayersList.find(previousPlayer => previousPlayer.steamid === serverPlayer.steamid
+                            && previousPlayer.playeruid === serverPlayer.playeruid)) {
+                            //New Player has Joined
+                            joinedPlayers.push(serverPlayer);
+                        }
+                    }
+
+                    for (const previousPlayer of previousPlayersList) {
+                        if (!currentWhitelistedPlayers.find(currentPlayer => currentPlayer.steamid === previousPlayer.steamid
+                            && currentPlayer.playeruid === previousPlayer.playeruid)) {
+                            //Player is not there in current Players list, so they left
+                            leftPlayers.push(previousPlayer);
+                        }
+                    }
+
+                    serverData.playerList = currentWhitelistedPlayers;
+                    serverData.currentPlayers = currentWhitelistedPlayers.length;
+                    db.set(serverDataKey, serverData);
+
+                    /**
+                     *Whitelisted Player Name Checks were added later so to avoid every player from being non whitelisted
+                     * we've added an automatic data migration here.
+                     *
+                     * Players who are already using a spoofed account would get automatically migrated since they are whitelisted already.
+                     */
+
+                    let migratedWhitelistedPlayerList = [];
+                    for (const whitelistedPlayer of whitelistedPlayers) {
+                        if (!whitelistedPlayer.name) {
+                            const whitelistedPlayerCurrentData = currentWhitelistedPlayers
+                                .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid);
+
+                            if (whitelistedPlayerCurrentData) {
+                                whitelistedPlayer.name = whitelistedPlayerCurrentData.name;
+                            }
+                        }
+                        migratedWhitelistedPlayerList.push(whitelistedPlayer);
+                    }
+                    whitelistedPlayers = migratedWhitelistedPlayerList;
+                    db.set(whitelistedPlayersListKey, whitelistedPlayers);
 
                     const whitelistEnabledKey = `${guildId}_${serverName.replaceAll(" ", "_")}_PalServerWhitelistEnabled`;
                     const whitelistEnabled = db.get(whitelistEnabledKey);
@@ -329,83 +393,32 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Whitelist Enabled in Server ${serverName}... Checking for Whitelisted Players...`)
                         }
-                        const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
-                        let whitelistedPlayers = db.get(whitelistedPlayersListKey);
-
-                        if (!whitelistedPlayers) {
-                            whitelistedPlayers = [];
-                        }
-
-                        /**
-                         *Whitelisted Player Name Checks were added later so to avoid every player from being non whitelisted
-                         * we've added an automatic data migration here.
-                         *
-                         * Players who are already using a spoofed account would get automatically migrated since they are whitelisted already.
-                         */
-
-                        let migratedWhitelistedPlayerList = [];
-                        for (const whitelistedPlayer of whitelistedPlayers) {
-                            if (!whitelistedPlayer.name) {
-                                const whitelistedPlayerCurrentData = serverData.playerList
-                                    .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid);
-
-                                if (whitelistedPlayerCurrentData) {
-                                    whitelistedPlayer.name = whitelistedPlayerCurrentData.name;
-                                }
-                            }
-                            migratedWhitelistedPlayerList.push(whitelistedPlayer);
-                        }
-                        whitelistedPlayers = migratedWhitelistedPlayerList;
-
-                        db.set(whitelistedPlayersListKey, whitelistedPlayers);
-
-                        let whitelistedPlayerNames = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.name);
-                        let whitelistedPlayerSteamIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.steamid);
-                        let whitelistedPlayerUIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.playeruid);
-
-                        //Checking for Players who are not whitelisted and are online
-                        let nonWhitelistedPlayers = serverData.playerList.filter(
-                            serverPlayer => !whitelistedPlayers.find(whitelistedPlayer =>
-                                whitelistedPlayer.steamid === serverPlayer.steamid
-                                && whitelistedPlayer.playeruid === serverPlayer.playeruid
-                                && whitelistedPlayer.name === serverPlayer.name
-                            ));
-
-                        let nameSpoofers = serverData.playerList.filter(serverPlayer => whitelistedPlayerSteamIds.includes(serverPlayer.steamid)
-                            && whitelistedPlayerUIds.includes(serverPlayer.playeruid) && !whitelistedPlayerNames.includes(serverPlayer.name));
-
-                        //Removing Non Whitelisted players from the list, we do not want to show join/left messages for non whitelisted players
-                        newPlayersList = newPlayersList.filter(newPlayer => whitelistedPlayerSteamIds.includes(newPlayer.steamid)
-                            && whitelistedPlayerUIds.includes(newPlayer.playeruid) && whitelistedPlayerNames.includes(newPlayer.name));
-
-                        leftPlayersList = leftPlayersList.filter(leftPlayer => whitelistedPlayerSteamIds.includes(leftPlayer.steamid)
-                            && whitelistedPlayerUIds.includes(leftPlayer.playeruid) && whitelistedPlayerNames.includes(leftPlayer.name));
 
                         if (nonWhitelistedPlayers.length > 0) {
                             //Non Whitelisted Players are online
                             for (const nonWhitelistedPlayer of nonWhitelistedPlayers) {
-                                kickPlayer(host, RCONPort, password, nonWhitelistedPlayer.steamid);
+                                //Giving some time before kicking to prevent players from being stuck in loading screen!
+                                await kickPlayer(host, RCONPort, password, nonWhitelistedPlayer.steamid);
 
                                 let nonWhitelistedPlayerName = nonWhitelistedPlayer.name;
                                 let nonWhitelistedPlayerSteamId = nonWhitelistedPlayer.steamid;
                                 let nonWhitelistedPlayerUId = nonWhitelistedPlayer.playeruid;
 
-                                logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
+                                await logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
                                     `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
-                                            and UID \`${nonWhitelistedPlayerUId}\` has been Kicked from the server.`);
+                                            and UID \`${nonWhitelistedPlayerUId}\` has been Kicked from the server.`,
+                                    nonWhitelistedPlayerName, nonWhitelistedPlayerSteamId, nonWhitelistedPlayerUId);
                             }
                         }
 
                         //Logging Name Spoofing Players here, we are not kicking here since they are kicked in the step above.
-                        if (nameSpoofers.length > 0) {
-                            for (const nameSpoofer of nameSpoofers) {
-                                let nameSpooferName = nameSpoofer.name;
-                                let nameSpooferSteamId = nameSpoofer.steamid;
-                                let nameSpooferUId = nameSpoofer.playeruid;
+                        if (nameSpoofingPlayers.length > 0) {
+                            for (const nameSpoofer of nameSpoofingPlayers) {
+                                await kickPlayer(host, RCONPort, password, nameSpoofer.steamid);
 
-                                logToWhitelistLogChannel(client, guildId, serverName, "Whitelisted Player Caught Name Spoofing!",
-                                    `Player \`${nameSpooferName}\` with Steam ID \`${nameSpooferSteamId}\` 
-                                            and UID \`${nameSpooferUId}\` has been Kicked from the server for name spoofing.`);
+                                await logToWhitelistLogChannel(client, guildId, serverName, "Whitelisted Player Caught Name Spoofing!",
+                                    `Player \`${nameSpoofer.originalName}\` caught Spoofing the Name: \`${nameSpoofer.name}\` with Steam ID \`${nameSpoofer.steamid}\` and UID \`${nameSpoofer.playeruid}\` has been Kicked from the server for name spoofing.`,
+                                    nameSpoofer.originalName, nameSpoofer.steamid, nameSpoofer.playeruid);
                             }
                         }
                     }else {
@@ -415,16 +428,16 @@ async function startRCONService(client, db) {
                     }
 
                     //Join/Leave Messages
-                    if (newPlayersList.length > 0 || leftPlayersList.length > 0) {
+                    if (joinedPlayers.length > 0 || leftPlayers.length > 0) {
 
-                        for (const newPlayer of newPlayersList) {
-                            logToGameLogChannel(client, guildId, serverName, "Player Joined", `${newPlayer.name} has Joined the Server!`);
-                            broadcastMessage(host, RCONPort, password, `${newPlayer.name} has Joined the Server!`);
+                        for (const newPlayer of joinedPlayers) {
+                            await logToGameLogChannel(client, guildId, serverName, "Player Joined", `${newPlayer.name} has Joined the Server!`);
+                            await broadcastMessage(host, RCONPort, password, `${newPlayer.name} has Joined the Server!`);
                         }
 
-                        for (const leftPlayer of leftPlayersList) {
-                            logToGameLogChannel(client, guildId, serverName, "Player Left", `${leftPlayer.name} has Left the Server!`);
-                            broadcastMessage(host, RCONPort, password, `${leftPlayer.name} has Left the Server!`);
+                        for (const leftPlayer of leftPlayers) {
+                            await logToGameLogChannel(client, guildId, serverName, "Player Left", `${leftPlayer.name} has Left the Server!`);
+                            await broadcastMessage(host, RCONPort, password, `${leftPlayer.name} has Left the Server!`);
                         }
                     }else {
                         if (config.debug) {
