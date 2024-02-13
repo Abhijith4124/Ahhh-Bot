@@ -12,6 +12,10 @@ module.exports = {
                 .setRequired(true)
                 .setAutocomplete(true)
         ).addStringOption(option =>
+            option.setName("ingamename")
+                .setDescription("In Game Name of the player to whitelist")
+                .setRequired(true)
+        ).addStringOption(option =>
             option.setName("steamid")
                 .setDescription("Steam ID of the player to whitelist")
                 .setRequired(true)
@@ -29,6 +33,7 @@ module.exports = {
         await interaction.deferReply();
 
         const serverName = interaction.options.getString("server");
+        const inGameName = interaction.options.getString("ingamename").trim();
         const steamId = interaction.options.getString("steamid").trim();
         const playerUid = interaction.options.getString("playeruid").trim();
         const discordUser = interaction.options.getUser("discorduser");
@@ -50,7 +55,7 @@ module.exports = {
             return;
         }
 
-        whitelistedPlayers.push({ steamid: steamId, playeruid: playerUid, discorduser: discordUser });
+        whitelistedPlayers.push({ name: inGameName, steamid: steamId, playeruid: playerUid, discorduser: discordUser });
         db.set(whitelistedPlayersListKey, whitelistedPlayers);
 
         const whitelistAnnouncementChannelIdKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistAnnouncementChannelId`;

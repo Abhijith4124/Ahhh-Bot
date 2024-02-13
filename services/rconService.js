@@ -319,17 +319,41 @@ async function startRCONService(client, db) {
                             whitelistedPlayers = [];
                         }
 
+                        /**
+                         *Whitelisted Player Name Checks were added later so to avoid every player from being non whitelisted
+                         * we've added an automatic data migration here.
+                         *
+                         * Players who are already using a spoofed account would get automatically migrated since they are whitelisted already.
+                         */
+
+                        let migratedWhitelistedPlayerList = [];
+                        for (const whitelistedPlayer of whitelistedPlayers) {
+                            if (!whitelistedPlayer.name) {
+                                whitelistedPlayer.name = serverData.playerList
+                                    .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid).name;
+                            }
+
+                            migratedWhitelistedPlayerList.push(whitelistedPlayer);
+                        }
+                        whitelistedPlayers = migratedWhitelistedPlayerList;
+
+                        db.set(whitelistedPlayersListKey, whitelistedPlayers);
+
+                        let whitelistedPlayerNames = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.name);
                         let whitelistedPlayerSteamIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.steamid);
                         let whitelistedPlayerUIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.playeruid);
 
                         //Checking for Players who are not whitelisted and are online
-                        let nonWhitelistedPlayers = serverData.playerList.filter(
-                            newPlayer => !whitelistedPlayerSteamIds.includes(newPlayer.steamid) && !whitelistedPlayerUIds.includes(newPlayer.playeruid));
+                        let nonWhitelistedPlayers = serverData.playerList.filter(serverPlayer => !whitelistedPlayerSteamIds.includes(serverPlayer.steamid)
+                            && !whitelistedPlayerUIds.includes(serverPlayer.playeruid) && !whitelistedPlayerNames.includes(serverPlayer.name));
+
+                        let nameSpoofers = serverData.playerList.filter(serverPlayer => whitelistedPlayerSteamIds.includes(serverPlayer.steamid)
+                            && whitelistedPlayerUIds.includes(serverPlayer.playeruid) && !whitelistedPlayerNames.includes(serverPlayer.name));
 
                         //Removing Non Whitelisted players from the list, we do not want to show join/left messages for non whitelisted players
                         newPlayersList = newPlayersList.filter(newPlayer => whitelistedPlayerSteamIds.includes(newPlayer.steamid)
                             && whitelistedPlayerUIds.includes(newPlayer.playeruid));
-                        
+
                         leftPlayersList = leftPlayersList.filter(leftPlayer => whitelistedPlayerSteamIds.includes(leftPlayer.steamid)
                             && whitelistedPlayerUIds.includes(leftPlayer.playeruid));
 
@@ -345,6 +369,19 @@ async function startRCONService(client, db) {
                                 logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
                                     `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
                                             and UID \`${nonWhitelistedPlayerUId}\` has been Kicked from the server.`);
+                            }
+                        }
+
+                        //Logging Name Spoofing Players here, we are not kicking here since they are kicked in the step above.
+                        if (nameSpoofers.length > 0) {
+                            for (const nameSpoofer of nameSpoofers) {
+                                let nameSpooferName = nameSpoofer.name;
+                                let nameSpooferSteamId = nameSpoofer.steamid;
+                                let nameSpooferUId = nameSpoofer.playeruid;
+
+                                logToWhitelistLogChannel(client, guildId, serverName, "Whitelisted Player Caught Name Spoofing!",
+                                    `Player \`${nameSpooferName}\` with Steam ID \`${nameSpooferSteamId}\` 
+                                            and UID \`${nameSpooferUId}\` has been Kicked from the server for name spoofing.`);
                             }
                         }
                     }else {
