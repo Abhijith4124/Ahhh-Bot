@@ -6,7 +6,7 @@ const config = require("../config.json");
 
 let firstRun = true;
 
-async function startRCONService(client, db) {
+async function doFirstRun(client, db) {
     console.log(`Started RCON Service...`)
 
     //Populate Server Data on the First Run
@@ -79,6 +79,10 @@ async function startRCONService(client, db) {
             }
         }
     }
+}
+
+async function startRCONService(client, db) {
+    await doFirstRun(client, db);
 
     //Status Message
     setInterval(async () => {
@@ -142,6 +146,10 @@ async function startRCONService(client, db) {
 
                     if (!whitelistEnabled) {
                         whitelistEnabled = false;
+                    }
+
+                    if (serverData.online === false) {
+                        serverData = defaultServerData;
                     }
 
                     const serverStatusEmbed = new EmbedBuilder()
@@ -356,18 +364,22 @@ async function startRCONService(client, db) {
                         let whitelistedPlayerUIds = whitelistedPlayers.map(whitelistedPlayer => whitelistedPlayer.playeruid);
 
                         //Checking for Players who are not whitelisted and are online
-                        let nonWhitelistedPlayers = serverData.playerList.filter(serverPlayer => !whitelistedPlayerSteamIds.includes(serverPlayer.steamid)
-                            && !whitelistedPlayerUIds.includes(serverPlayer.playeruid) && !whitelistedPlayerNames.includes(serverPlayer.name));
+                        let nonWhitelistedPlayers = serverData.playerList.filter(
+                            serverPlayer => !whitelistedPlayers.find(whitelistedPlayer =>
+                                whitelistedPlayer.steamid === serverPlayer.steamid
+                                && whitelistedPlayer.playeruid === serverPlayer.playeruid
+                                && whitelistedPlayer.name === serverPlayer.name
+                            ));
 
                         let nameSpoofers = serverData.playerList.filter(serverPlayer => whitelistedPlayerSteamIds.includes(serverPlayer.steamid)
                             && whitelistedPlayerUIds.includes(serverPlayer.playeruid) && !whitelistedPlayerNames.includes(serverPlayer.name));
 
                         //Removing Non Whitelisted players from the list, we do not want to show join/left messages for non whitelisted players
                         newPlayersList = newPlayersList.filter(newPlayer => whitelistedPlayerSteamIds.includes(newPlayer.steamid)
-                            && whitelistedPlayerUIds.includes(newPlayer.playeruid));
+                            && whitelistedPlayerUIds.includes(newPlayer.playeruid) && whitelistedPlayerNames.includes(newPlayer.name));
 
                         leftPlayersList = leftPlayersList.filter(leftPlayer => whitelistedPlayerSteamIds.includes(leftPlayer.steamid)
-                            && whitelistedPlayerUIds.includes(leftPlayer.playeruid));
+                            && whitelistedPlayerUIds.includes(leftPlayer.playeruid) && whitelistedPlayerNames.includes(leftPlayer.name));
 
                         if (nonWhitelistedPlayers.length > 0) {
                             //Non Whitelisted Players are online
@@ -424,6 +436,6 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, 2000);
+    }, 5000);
 }
 module.exports = {startRCONService}
