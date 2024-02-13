@@ -45,7 +45,7 @@ async function getServerPlayersInfo(host, port, password) {
 
         const playerlist = parseCSV(
             // eslint-disable-next-line no-control-regex
-            serverPlayersResponse.toString().replace(/\u0000/g, "")
+            serverPlayersResponse.toString()
         ).filter(x => x.playeruid);
 
         return {
