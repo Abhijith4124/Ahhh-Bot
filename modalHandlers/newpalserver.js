@@ -30,8 +30,8 @@ async function handleModal(interaction) {
             return;
         }
 
-        const serverVersionResponse = serverInfoResponse.data.serverVersion;
-        const serverNameResponse = serverInfoResponse.data.serverName;
+        const serverVersionResponse = serverInfoResponse.serverInfo.serverVersion;
+        const serverNameResponse = serverInfoResponse.serverInfo.serverName;
 
         const guildPalServersKey = `${interaction.guild.id}_PalServers`;
 

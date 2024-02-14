@@ -12,7 +12,9 @@
   "dependencies": {
     "discord-api-types": "^0.37.69",
     "discord.js": "^14.14.1",
-    "simple-json-db": "^2.0.0"
+    "minecraft-rcon-client": "^2.1.2",
+    "simple-json-db": "^2.0.0",
+    "srcds-rcon": "^2.2.1"
   },
   "devDependencies": {
     "eslint": "^8.56.0"

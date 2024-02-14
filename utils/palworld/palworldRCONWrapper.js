@@ -1,12 +1,18 @@
-const RCONClient = require("../rcon/client");
+const { Rcon } = require('minecraft-rcon-client')
+const config = require('../../config.json');
 
 async function getServerInfo(host, port, password) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        })
 
-        await client.connect(password || "");
-        const serverInfo = await client.sendCommand("Info");
-        client.disconnect();
+        await rconClient.connect();
+
+        let serverInfo = await rconClient.send("Info");
+        await rconClient.disconnect();
 
         const message = serverInfo.toString();
         const parts = message.split("[");
@@ -21,12 +27,17 @@ async function getServerInfo(host, port, password) {
 
         return {
             status: "success",
-            data: {
+            message: "Successfully Fetched Server Info",
+            serverInfo: {
                 serverName: serverNameResponse,
                 serverVersion: serverVersionResponse
             }
         }
     }catch (e) {
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
@@ -35,13 +46,18 @@ async function getServerInfo(host, port, password) {
 
 async function getServerPlayersInfo(host, port, password) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        })
 
-        await client.connect(password || "");
-        const serverInfo = await client.sendCommand("ShowPlayers");
-        client.disconnect();
+        await rconClient.connect();
 
-        const serverPlayersResponse = serverInfo.toString();
+        let playersInfo =  await rconClient.send(`ShowPlayers`);
+        await rconClient.disconnect();
+
+        const serverPlayersResponse = playersInfo.toString();
 
         const playerlist = parseCSV(
             // eslint-disable-next-line no-control-regex
@@ -50,11 +66,16 @@ async function getServerPlayersInfo(host, port, password) {
 
         return {
             status: "success",
+            message: "Successfully Fetched Player List",
             data: {
                 playerList: playerlist
             }
         }
     }catch (e) {
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
@@ -63,17 +84,26 @@ async function getServerPlayersInfo(host, port, password) {
 
 async function kickPlayer(host, port, password, playerSteamId) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        });
 
-        await client.connect(password || "");
-        await client.sendCommand("KickPlayer " + playerSteamId);
-        client.disconnect();
+        await rconClient.connect();
+
+        await rconClient.send(`KickPlayer ${playerSteamId}`);
+        await rconClient.disconnect();
 
         return {
             status: "success",
+            message: `Successfully Kicked Player ${playerSteamId}`
         }
     }catch (e) {
-        console.error(e)
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
@@ -82,17 +112,26 @@ async function kickPlayer(host, port, password, playerSteamId) {
 
 async function banPlayer(host, port, password, playerSteamId) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        });
 
-        await client.connect(password || "");
-        await client.sendCommand("BanPlayer " + playerSteamId);
-        client.disconnect();
+        await rconClient.connect();
+
+        await rconClient.send(`BanPlayer ${playerSteamId}`);
+        await rconClient.disconnect();
 
         return {
             status: "success",
+            message: `Successfully Banned Player ${playerSteamId}`
         }
     }catch (e) {
-        console.error(e)
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
@@ -101,17 +140,26 @@ async function banPlayer(host, port, password, playerSteamId) {
 
 async function broadcastMessage(host, port, password, message) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        });
 
-        await client.connect(password || "");
-        await client.sendCommand("Broadcast  " + message.replaceAll(" ", "_"));
-        client.disconnect();
+        await rconClient.connect();
+
+        await rconClient.send(`Broadcast ${message.replaceAll(" ", "_")}`);
+        await rconClient.disconnect();
 
         return {
             status: "success",
+            message: `Broadcasted Message: ${message}`
         }
     }catch (e) {
-        console.error(e)
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
@@ -120,17 +168,26 @@ async function broadcastMessage(host, port, password, message) {
 
 async function saveServer(host, port, password) {
     try {
-        const client = new RCONClient(host, port);
+        let rconClient = new Rcon({
+            host: host,
+            port: port,
+            password: password
+        });
 
-        await client.connect(password || "");
-        await client.sendCommand("Save");
-        client.disconnect();
+        await rconClient.connect();
+
+        await rconClient.send(`Save`);
+        await rconClient.disconnect();
 
         return {
             status: "success",
+            message: `Successfully Saved Server`
         }
     }catch (e) {
-        console.error(e)
+        if (config.debug) {
+            console.log(`[RCON]: Error: ${e}`)
+        }
+
         return {
             status: "failed"
         }
