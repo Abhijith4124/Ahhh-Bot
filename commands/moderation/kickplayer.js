@@ -1,6 +1,7 @@
 const {getServerPlayersInfo, kickPlayer} = require("../../utils/palworld/palworldRCONWrapper");
 const {SlashCommandBuilder} = require("discord.js");
 const {PermissionFlagsBits} = require("discord-api-types/v10");
+const {kickUser} = require("../../utils/palworld/userManager");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("kickplayer")
@@ -24,7 +25,7 @@ module.exports = {
         let serverName = interaction.options.getString("server");
         let playerSteamId = interaction.options.getString("playersteamid");
 
-        await kickPlayer(interaction, {
+        await kickUser(interaction, {
             serverName: serverName,
             playerSteamId: playerSteamId
         })
