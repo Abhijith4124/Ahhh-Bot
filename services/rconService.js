@@ -219,6 +219,13 @@ async function startRCONService(client, db) {
 
                         const statusChannel = await client.channels.cache.get(statusChannelId);
 
+                        if (!client.guilds.cache.get(guildId)) {
+                            if (config.debug) {
+                                console.log(`[RCON Service]: Failed to find Guild ${serverName}`);
+                            }
+                            continue;
+                        }
+
                         if (!client.guilds.cache.get(guildId).members.me.permissionsIn(statusChannel).has("SendMessages")) {
                             if (config.debug) {
                                 console.log(`[RCON Service]: Permission Denied to Send Status Message to ${serverName}`);
