@@ -42,13 +42,15 @@ module.exports = {
         guildServers.splice(serverIndex, 1);
         db.set(guildServersKey, guildServers);
 
-        //Removing from the global Servers List
-        let palServers = db.get("PalServers");
-        if (palServers) {
-            let guildPalServersIndex = palServers.indexOf(guildServersKey);
-            if (guildPalServersIndex !== -1) {
-                palServers.splice(guildPalServersIndex, 1);
-                db.set("PalServers", palServers);
+        if (guildServers.length < 1) {
+            //Removing from the global Servers List
+            let palServers = db.get("PalServers");
+            if (palServers) {
+                let guildPalServersIndex = palServers.indexOf(guildServersKey);
+                if (guildPalServersIndex !== -1) {
+                    palServers.splice(guildPalServersIndex, 1);
+                    db.set("PalServers", palServers);
+                }
             }
         }
 
