@@ -1,6 +1,7 @@
 const net = require('net');
 const RCONPacketType = require('./types.js');
 const RCONPacket = require('./packets.js');
+const config = require('../../config.json');
 
 class RCONClient {
     constructor(host, port) {
@@ -21,16 +22,24 @@ class RCONClient {
                 const packet = new RCONPacket(data);
 
                 if (packet.requestId === -1) {
+                    if (config.debug) {
+                        console.log('[RCON]: Authentication failed');
+                    }
                     this.socket.destroy(new Error('Authentication failed'));
                     return;
                 }
 
                 if (packet.type === RCONPacketType.COMMAND && packet.requestId === authPacket.requestId) {
+                    if (config.debug) {
+                        console.log('[RCON]: Authentication Error');
+                    }
                     this.socket.removeListener('error', reject);
                     resolve(this);
                     return;
                 }
-
+                if (config.debug) {
+                    console.log('[RCON]: Unknown Packet');
+                }
                 this.socket.destroy(new Error('Unknown packet'));
             };
 
@@ -38,7 +47,11 @@ class RCONClient {
                 .once('error', reject)
                 .once('data', onData)
                 .once('connect', onConnect)
-                .once('timeout', reject)
+                .once('timeout', () => {
+                    if (config.debug) {
+                        console.log('[RCON]: Server Connection Timeout');
+                    }
+                })
                 .connect(this.port, this.host);
         }).catch((err) => {
             this.socket.destroy();
