@@ -23,7 +23,7 @@ module.exports = {
         const guildServersKey = `${interaction.guild.id}_PalServers`;
         let guildServers = db.get(guildServersKey);
 
-        if (!guildServers) {
+        if (!guildServers || guildServers.length < 1) {
             removeServerResponseEmbed.setTitle("Server Does not Exist");
             removeServerResponseEmbed.setDescription("You have no servers added to remove.");
             await interaction.reply({ embeds: [removeServerResponseEmbed] });

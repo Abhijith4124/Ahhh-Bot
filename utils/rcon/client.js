@@ -10,7 +10,7 @@ class RCONClient {
     }
 
     connect(password) {
-        this.socket = new net.Socket().setTimeout(2000);
+        this.socket = new net.Socket().setTimeout(1000).setNoDelay(true);
         const authPacket = RCONPacket.createFrom(1, RCONPacketType.AUTH, password);
 
         return new Promise((resolve, reject) => {
@@ -30,9 +30,6 @@ class RCONClient {
                 }
 
                 if (packet.type === RCONPacketType.COMMAND && packet.requestId === authPacket.requestId) {
-                    if (config.debug) {
-                        console.log('[RCON]: Authentication Error');
-                    }
                     this.socket.removeListener('error', reject);
                     resolve(this);
                     return;
