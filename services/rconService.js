@@ -72,7 +72,7 @@ async function doFirstRun(client, db) {
                     }
                     serverData = defaultServerData;
                     db.set(serverDataKey, serverData);
-                    return;
+                    continue;
                 }
 
                 db.set(serverDataKey, serverData);
@@ -121,7 +121,7 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: No Status Channel Set for Server ${serverName}  so skipping...`);
                         }
-                        return;
+                        continue;
                     }
 
                     let defaultServerData = {
@@ -302,7 +302,7 @@ async function startRCONService(client, db) {
                         }
                         serverData.online = false;
                         db.set(serverDataKey, serverData);
-                        return
+                        continue;
                     }
 
                     db.set(serverDataKey, serverData);
@@ -311,12 +311,16 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Skipping Server Check since no players are online in Server ${serverName}...`)
                         }
-                        return;
+                        continue;
                     }
 
                     //Sorting Server Players
                     const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
                     let whitelistedPlayers = db.get(whitelistedPlayersListKey);
+
+                    if (!whitelistedPlayers) {
+                        whitelistedPlayers = [];
+                    }
 
                     let nonWhitelistedPlayers = [];
                     let nameSpoofingPlayers = [];

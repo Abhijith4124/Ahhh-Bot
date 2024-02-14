@@ -1,6 +1,7 @@
 const net = require('net');
 const RCONPacketType = require('./types.js');
 const RCONPacket = require('./packets.js');
+const config = require('../../config.json');
 
 class RCONClient {
     constructor(host, port) {
@@ -9,7 +10,7 @@ class RCONClient {
     }
 
     connect(password) {
-        this.socket = new net.Socket().setTimeout(1000);
+        this.socket = new net.Socket().setTimeout(1000).setNoDelay(true);
         const authPacket = RCONPacket.createFrom(1, RCONPacketType.AUTH, password);
 
         return new Promise((resolve, reject) => {
@@ -21,6 +22,9 @@ class RCONClient {
                 const packet = new RCONPacket(data);
 
                 if (packet.requestId === -1) {
+                    if (config.debug) {
+                        console.log('[RCON]: Authentication failed');
+                    }
                     this.socket.destroy(new Error('Authentication failed'));
                     return;
                 }
@@ -30,7 +34,9 @@ class RCONClient {
                     resolve(this);
                     return;
                 }
-
+                if (config.debug) {
+                    console.log('[RCON]: Unknown Packet');
+                }
                 this.socket.destroy(new Error('Unknown packet'));
             };
 
@@ -38,7 +44,11 @@ class RCONClient {
                 .once('error', reject)
                 .once('data', onData)
                 .once('connect', onConnect)
-                .once('timeout', reject)
+                .once('timeout', () => {
+                    if (config.debug) {
+                        console.log('[RCON]: Server Connection Timeout');
+                    }
+                })
                 .connect(this.port, this.host);
         }).catch((err) => {
             this.socket.destroy();
@@ -64,6 +74,9 @@ class RCONClient {
                 }
 
                 if (packet.type === RCONPacketType.RESPONSE && packet.requestId === endPacket.requestId) {
+                    if (config.debug) {
+                        console.log('[RCON]: Send Command Failed');
+                    }
                     this.socket.off('error', reject);
                     resolve(result);
                     return;
@@ -73,7 +86,12 @@ class RCONClient {
 
         return new Promise((resolve, reject) => {
             onData = onDataFunc(resolve, reject);
-            this.socket.once('error', reject).on('data', onData).write(cmdPacket.buffer);
+            this.socket.once('error', () => {
+                if (config.debug) {
+                    console.log('[RCON]: Send Command error');
+                }
+                reject();
+            }).on('data', onData).write(cmdPacket.buffer);
             this.socket.write(endPacket.buffer);
         }).then((response) => {
             this.socket.off('data', onData);
