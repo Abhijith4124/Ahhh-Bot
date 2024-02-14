@@ -5,7 +5,10 @@ const { Client, Events, GatewayIntentBits, REST, Routes, Collection} = require('
 
 const config = require('./config.json');
 const {startRCONService} = require("./services/rconService");
+const {cleanUp} = require("./utils/cleaner/cleaner");
+const {ActivityType} = require("discord-api-types/v10");
 const db = new JSONdb('./data/data.json');
+const logger = require('./utils/discord/logger');
 
 const client = new Client({
     intents: [
@@ -15,6 +18,7 @@ const client = new Client({
 
 client.commands = new Collection();
 client.db = db;
+client.logger = logger;
 
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
@@ -113,8 +117,15 @@ const rest = new REST().setToken(config.token);
 })();
 
 client.once(Events.ClientReady, readyClient => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    client.user.setActivity({
+        type: ActivityType.Custom,
+        name: "customstatus",
+        state: config.customStatusMessage
+    })
+
     startRCONService(client, db);
 });
 
+cleanUp(db);
 client.login(config.token);

@@ -11,6 +11,8 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
 ## Features
 
 - Whitelisting: Control access to your Palworld Game Server by managing whitelisted players directly from Discord.
+- Player Spoofing Prevention: Prevent hackers from pretending to be another player on your server.
+- Advanced Whitelisting: Whitelist Players on your server using thier SteamId, PlayerUid and even thier In Game Name to prevent any spoofing.
 - In-Game Join/Leave Messages: Keep track of player activity with automatic announcements when players join or leave your Palworld server.
 - Server Status Channel: Ability to setup a Server Status channel and the bot will automatically display the Current Server Status, Online Players, Max Player Count, Peak Player Count and a Player list.
 - Discord Game Log Channel: Ability to setup a Game Log channel for the bot to post Game Server logs like Player Join/Leave, Non Whitelisted Player being kicked, Player Whitelisted, etc.
@@ -19,6 +21,9 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
 - Player Management: Easily ban or kick players from your Palworld Game Server using Discord commands.
 - Broadcast Messages: Send messages directly to your Palworld server for all players to see, facilitating server-wide communication.
 - PlayerUID and Steam ID Whitelisting: Support for both PlayerUID and Steam ID whitelisting, offering flexibility in player identification and management.
+
+## Screenshots
+![Welcome](https://i.ibb.co/1Jbnd3L/welcome.png)
 ## Commands
 
 ### Server Configuration
@@ -38,7 +43,9 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
 ### Whitelisting Players
 - `/whitelist [server] [enabled]`: Enable or disable whitelist for a Palworld Server.
 - `/addwhitelist [server] [steamid] [playeruid] [discorduser]`: Add a player to the whitelist. Optionally, mention the Discord user for role assignment and announcement.
-- `/removewhitelist [server] [steamid] [playeruid] [discorduser]`: Remove a player from the whitelist. Optionally, mention discord user to remove associated Discord roles.
+- `/removewhitelist [server] [playername] [discorduser]`: Remove a player from the whitelist. Optionally, mention discord user to remove associated Discord roles.
+- -`/linkwhitelist [server] [playername] [discorduser]`: Links a Game Player to a Discord User, granting them Whitelist roles and Welcome message if specified.
+- -`/unlinkwhitelist [server] [playername]`: Unlinks a Game Player from a Discord User, removes thier Whitelist roles if specified.
 
 ### Miscellaneous Commands
 - `/save`: Save the current Palworld game state.
@@ -46,6 +53,18 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
 - `/banplayer [server] [playersteamid]`: Ban a player by their Steam ID.
 - `/kickplayer [server] [playersteamid]`: Kick a player by their Steam ID.
 
+### UI Options
+##
+![Server Configuration](https://i.ibb.co/Jt3RJt5/server-config.png)
+- Configure Server Using the UI
+
+##
+![Whitelist UI](https://i.ibb.co/qJcksh8/whitelist.png)
+- Whitelist Player Straight from the log
+
+##
+![Spoof Detection](https://i.ibb.co/V2PRVSC/spoof-prevention.pngg)
+- Ban Detected Players Instantly with just a click!
 
 
 ## Config File
@@ -53,8 +72,10 @@ Edit the config.json file in the root directory
 
 ```
 {
-  "token": "your_discord_bot_token",
-  "botApplicationId": "your_bot_id"
+  "debug": false,
+  "token": "",
+  "botApplicationId": "",
+  "customStatusMessage": ""
 }
 ```
 

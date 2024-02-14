@@ -98,6 +98,9 @@ module.exports = {
                 const statusChannelId = menuInteraction.values[0];
 
                 if (statusChannelId) {
+                    const statusMessageIdKey = `${statusChannelId}_${serverName.replaceAll(" ", "_")}_StatusMessageId`;
+                    db.delete(statusMessageIdKey);
+
                     db.set(statusChannelIdKey, statusChannelId);
                     await menuInteraction.reply({ content: `Status Channel Set to <#${statusChannelId}>` });
                 }

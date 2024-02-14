@@ -9,7 +9,7 @@ class RCONClient {
     }
 
     connect(password) {
-        this.socket = new net.Socket();
+        this.socket = new net.Socket().setTimeout(1000);
         const authPacket = RCONPacket.createFrom(1, RCONPacketType.AUTH, password);
 
         return new Promise((resolve, reject) => {
@@ -34,7 +34,12 @@ class RCONClient {
                 this.socket.destroy(new Error('Unknown packet'));
             };
 
-            this.socket.once('error', reject).once('data', onData).once('connect', onConnect).connect(this.port, this.host);
+            this.socket
+                .once('error', reject)
+                .once('data', onData)
+                .once('connect', onConnect)
+                .once('timeout', reject)
+                .connect(this.port, this.host);
         }).catch((err) => {
             this.socket.destroy();
             throw err;
