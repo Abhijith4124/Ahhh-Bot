@@ -121,7 +121,7 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: No Status Channel Set for Server ${serverName}  so skipping...`);
                         }
-                        return;
+                        continue;
                     }
 
                     let defaultServerData = {
@@ -317,6 +317,10 @@ async function startRCONService(client, db) {
                     //Sorting Server Players
                     const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
                     let whitelistedPlayers = db.get(whitelistedPlayersListKey);
+
+                    if (!whitelistedPlayers) {
+                        whitelistedPlayers = [];
+                    }
 
                     let nonWhitelistedPlayers = [];
                     let nameSpoofingPlayers = [];
