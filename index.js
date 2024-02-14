@@ -104,8 +104,8 @@ const rest = new REST().setToken(config.token);
 (async () => {
     try {
 
-        await rest.put(Routes.applicationCommands(config.botApplicationId), { body: [] })
-            .catch(console.error);
+        // await rest.put(Routes.applicationCommands(config.botApplicationId), { body: [] })
+        //     .catch(console.error);
 
         await rest.put(
             Routes.applicationCommands(config.botApplicationId),
