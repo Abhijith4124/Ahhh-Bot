@@ -10,7 +10,7 @@ class RCONClient {
     }
 
     connect(password) {
-        this.socket = new net.Socket().setTimeout(1000);
+        this.socket = new net.Socket().setTimeout(2000);
         const authPacket = RCONPacket.createFrom(1, RCONPacketType.AUTH, password);
 
         return new Promise((resolve, reject) => {
@@ -77,6 +77,9 @@ class RCONClient {
                 }
 
                 if (packet.type === RCONPacketType.RESPONSE && packet.requestId === endPacket.requestId) {
+                    if (config.debug) {
+                        console.log('[RCON]: Send Command Failed');
+                    }
                     this.socket.off('error', reject);
                     resolve(result);
                     return;
@@ -86,7 +89,12 @@ class RCONClient {
 
         return new Promise((resolve, reject) => {
             onData = onDataFunc(resolve, reject);
-            this.socket.once('error', reject).on('data', onData).write(cmdPacket.buffer);
+            this.socket.once('error', () => {
+                if (config.debug) {
+                    console.log('[RCON]: Send Command error');
+                }
+                reject();
+            }).on('data', onData).write(cmdPacket.buffer);
             this.socket.write(endPacket.buffer);
         }).then((response) => {
             this.socket.off('data', onData);
