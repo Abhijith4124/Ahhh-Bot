@@ -9,6 +9,9 @@ const {cleanUp} = require("./utils/cleaner/cleaner");
 const {ActivityType} = require("discord-api-types/v10");
 const db = new JSONdb('./data/data.json');
 const logger = require('./utils/discord/logger');
+const {deployCommands, deleteCommands} = require("./utils/discord/commandsDeploymentManager");
+
+const CURRENT_BOT_VERSION = 1;
 
 const client = new Client({
     intents: [
@@ -99,31 +102,30 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-const rest = new REST().setToken(config.token);
-
-(async () => {
-    try {
-
-        // await rest.put(Routes.applicationCommands(config.botApplicationId), { body: [] })
-        //     .catch(console.error);
-
-        await rest.put(
-            Routes.applicationCommands(config.botApplicationId),
-            { body: client.commands.map(command => command.data.toJSON()) }
-        );
-    } catch (error) {
-        console.error(error);
-    }
-})();
-
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+
     client.user.setActivity({
         type: ActivityType.Custom,
         name: "customstatus",
         state: config.customStatusMessage
-    })
+    });
 
+    if (!db.get(`BotVersion`)) {
+        db.set(`BotVersion`, 0);
+    }
+
+    if (db.get(`BotVersion`) < CURRENT_BOT_VERSION) {
+        deleteCommands(client).then(() => {
+            deployCommands(client).then(() => {
+                db.set(`BotVersion`, CURRENT_BOT_VERSION);
+            }).catch(e => {
+                console.error(e);
+            });
+        }).catch(e => {
+            console.error(e);
+        });
+    }
     startRCONService(client, db);
 });
 
