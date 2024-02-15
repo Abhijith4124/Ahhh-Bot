@@ -307,8 +307,7 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Skipping Server Check since Server ${serverName} is offline...`);
                         }
-                        serverData.online = false;
-                        db.set(serverDataKey, serverData);
+                        db.set(serverDataKey, defaultServerData);
                         continue;
                     }
 
