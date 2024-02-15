@@ -9,7 +9,7 @@ const {cleanUp} = require("./utils/cleaner/cleaner");
 const {ActivityType} = require("discord-api-types/v10");
 const db = new JSONdb('./data/data.json');
 const logger = require('./utils/discord/logger');
-const {deployCommands, deleteCommands} = require("./utils/discord/commandsDeploymentManager");
+const {deleteCommandsFromGuild, deployCommandsToGuild} = require("./utils/discord/commandsDeploymentManager");
 
 const CURRENT_BOT_VERSION = 1;
 
@@ -102,6 +102,16 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+client.on(Events.GuildCreate, (guild) => {
+    deployCommandsToGuild(client, guild.id).then(() => {
+        if (config.debug) {
+            console.log(`Deployed Commands to ${guild.name}`);
+        }
+    }).catch(e => {
+        console.error(e);
+    });
+})
+
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
@@ -116,15 +126,19 @@ client.once(Events.ClientReady, readyClient => {
     }
 
     if (db.get(`BotVersion`) < CURRENT_BOT_VERSION) {
-        deleteCommands(client).then(() => {
-            deployCommands(client).then(() => {
-                db.set(`BotVersion`, CURRENT_BOT_VERSION);
+        for (const guild of readyClient.guilds.cache.values()) {
+            console.log(guild.id)
+            deleteCommandsFromGuild(client, guild.id).then(() => {
+                deployCommandsToGuild(client, guild.id).then(() => {
+                    db.set(`BotVersion`, CURRENT_BOT_VERSION);
+                }).catch(e => {
+                    console.error(e);
+                });
             }).catch(e => {
-                console.error(e);
-            });
-        }).catch(e => {
-            console.error(e);
-        });
+                console.error(e)
+            })
+        }
+
     }
     startRCONService(client, db);
 });
