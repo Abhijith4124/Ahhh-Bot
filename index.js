@@ -127,7 +127,6 @@ client.once(Events.ClientReady, readyClient => {
 
     if (db.get(`BotVersion`) < CURRENT_BOT_VERSION) {
         for (const guild of readyClient.guilds.cache.values()) {
-            console.log(guild.id)
             deleteCommandsFromGuild(client, guild.id).then(() => {
                 deployCommandsToGuild(client, guild.id).then(() => {
                     db.set(`BotVersion`, CURRENT_BOT_VERSION);
