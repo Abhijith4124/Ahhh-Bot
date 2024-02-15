@@ -307,7 +307,10 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Skipping Server Check since Server ${serverName} is offline...`);
                         }
-                        db.set(serverDataKey, defaultServerData);
+
+                        //Changing Only Online here because in case the RCON times out, we don't want to reset the player list and bug join/leave.
+                        serverData.online = false;
+                        db.set(serverDataKey, serverData);
                         continue;
                     }
 
