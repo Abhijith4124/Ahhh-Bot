@@ -16,8 +16,7 @@ async function logToGameLogChannel(client, guild, serverName, title, message) {
         const gameLogChannelIdKey = `${guild}_${serverName.replaceAll(" ", "_")}_GameLogChannelId`;
         const gameLogChannelId = client.db.get(gameLogChannelIdKey);
 
-        if (gameLogChannelId) {
-
+        if (gameLogChannelId && client.guilds.cache.get(guild)) {
             if (!client.guilds.cache.get(guild).members.me.permissionsIn(gameLogChannelId).has("SendMessages")) {
                 if (config.debug) {
                     console.log(`[LOGGER]: Permission Denied to Log Game Logs to ${serverName}`);
@@ -55,7 +54,7 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
         const whitelistLogChannelIdKey = `${guild}_${serverName.replaceAll(" ", "_")}_WhitelistLogChannelId`;
         const whitelistLogChannelId = client.db.get(whitelistLogChannelIdKey);
 
-        if (whitelistLogChannelId) {
+        if (whitelistLogChannelId && client.guilds.cache.get(guild)) {
 
             if (!client.guilds.cache.get(guild).members.me.permissionsIn(whitelistLogChannelId).has("SendMessages")) {
                 if (config.debug) {
@@ -103,6 +102,8 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
                         .setCustomId("banplayer")
                         .setLabel("Ban Player")
                         .setStyle(ButtonStyle.Danger).setEmoji("🔨")
+                }else {
+                    actionButton.setLabel("").setDisabled(true);
                 }
 
                 const actionRow = new ActionRowBuilder().addComponents(actionButton);

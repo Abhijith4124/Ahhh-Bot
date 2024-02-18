@@ -26,10 +26,16 @@ async function kickUser(interaction, data) {
             return;
         }
 
-        await kickPlayer(server.host, server.RCONPort, server.password, data.playerSteamId);
+        let kickPlayerResponse = await kickPlayer(server.host, server.RCONPort, server.password, data.playerSteamId);
 
-        kickEmbed.setTitle("Kicked Player");
-        kickEmbed.setDescription(`Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        if (kickPlayerResponse.status === "success") {
+            kickEmbed.setTitle("Kicked Player");
+            kickEmbed.setDescription(`Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        }else {
+            kickEmbed.setTitle("Failed to Kick Player");
+            kickEmbed.setDescription(`Failed to Kick Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        }
+
         await interaction.editReply({ embeds: [kickEmbed] });
         await interaction.client.logger.logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Kicked Player", `Kicked Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
     }catch (e) {
@@ -62,12 +68,24 @@ async function banUser(interaction, data) {
             return;
         }
 
-        await banPlayer(server.host, server.RCONPort, server.password, data.playerSteamId);
+        let banPlayerResponse = await banPlayer(server.host, server.RCONPort, server.password, data.playerSteamId);
 
-        kickEmbed.setTitle("Banned Player");
-        kickEmbed.setDescription(`Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        let title = "";
+        let description = ""
+
+        if (banPlayerResponse.status === "success") {
+            title = "Banned Player";
+            description = `Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`
+        }else {
+            title = "Failed to Ban Player"
+            description = `Failed to Ban Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`
+        }
+
+        kickEmbed.setTitle(title);
+        kickEmbed.setDescription(description);
+
         await interaction.editReply({ embeds: [kickEmbed] });
-        await interaction.client.logger.logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, "Banned Player", `Banned Player with the Steam Id ${data.playerSteamId} from the server ${data.serverName}`);
+        await interaction.client.logger.logToGameLogChannel(interaction.client, interaction.guild.id, data.serverName, title, description);
     }catch (e) {
         console.error(e)
     }

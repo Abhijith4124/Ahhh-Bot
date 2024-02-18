@@ -219,6 +219,13 @@ async function startRCONService(client, db) {
 
                         const statusChannel = await client.channels.cache.get(statusChannelId);
 
+                        if (!client.guilds.cache.get(guildId)) {
+                            if (config.debug) {
+                                console.log(`[RCON Service]: Failed to find Guild ${serverName}`);
+                            }
+                            continue;
+                        }
+
                         if (!client.guilds.cache.get(guildId).members.me.permissionsIn(statusChannel).has("SendMessages")) {
                             if (config.debug) {
                                 console.log(`[RCON Service]: Permission Denied to Send Status Message to ${serverName}`);
@@ -300,6 +307,8 @@ async function startRCONService(client, db) {
                         if (config.debug) {
                             console.log(`[RCON Service]: Skipping Server Check since Server ${serverName} is offline...`);
                         }
+
+                        //Changing Only Online here because in case the RCON times out, we don't want to reset the player list and bug join/leave.
                         serverData.online = false;
                         db.set(serverDataKey, serverData);
                         continue;
@@ -402,27 +411,40 @@ async function startRCONService(client, db) {
                             //Non Whitelisted Players are online
                             for (const nonWhitelistedPlayer of nonWhitelistedPlayers) {
                                 //Giving some time before kicking to prevent players from being stuck in loading screen!
-                                await kickPlayer(host, RCONPort, password, nonWhitelistedPlayer.steamid);
+                                let kickPlayerResponse = await kickPlayer(host, RCONPort, password, nonWhitelistedPlayer.steamid);
 
                                 let nonWhitelistedPlayerName = nonWhitelistedPlayer.name;
                                 let nonWhitelistedPlayerSteamId = nonWhitelistedPlayer.steamid;
                                 let nonWhitelistedPlayerUId = nonWhitelistedPlayer.playeruid;
 
-                                await logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
-                                    `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
+                                if (kickPlayerResponse.status === "success") {
+                                    await logToWhitelistLogChannel(client, guildId, serverName, "Non Whitelisted Player Kicked",
+                                        `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
                                             and UID \`${nonWhitelistedPlayerUId}\` has been Kicked from the server.`,
-                                    nonWhitelistedPlayerName, nonWhitelistedPlayerSteamId, nonWhitelistedPlayerUId);
+                                        nonWhitelistedPlayerName, nonWhitelistedPlayerSteamId, nonWhitelistedPlayerUId);
+                                }else {
+                                    await logToWhitelistLogChannel(client, guildId, serverName, "Failed to Kick Non Whitelisted Player!",
+                                        `Player \`${nonWhitelistedPlayerName}\` with Steam ID \`${nonWhitelistedPlayerSteamId}\` 
+                                            and UID \`${nonWhitelistedPlayerUId}\` cannot be kicked! \n Error Message: ${kickPlayerResponse.message}`,
+                                        nonWhitelistedPlayerName, nonWhitelistedPlayerSteamId, nonWhitelistedPlayerUId);
+                                }
                             }
                         }
 
                         //Logging Name Spoofing Players here, we are not kicking here since they are kicked in the step above.
                         if (nameSpoofingPlayers.length > 0) {
                             for (const nameSpoofer of nameSpoofingPlayers) {
-                                await kickPlayer(host, RCONPort, password, nameSpoofer.steamid);
+                                let kickPlayerResponse = await kickPlayer(host, RCONPort, password, nameSpoofer.steamid);
 
-                                await logToWhitelistLogChannel(client, guildId, serverName, "Whitelisted Player Caught Name Spoofing!",
-                                    `Player \`${nameSpoofer.originalName}\` caught Spoofing the Name: \`${nameSpoofer.name}\` with Steam ID \`${nameSpoofer.steamid}\` and UID \`${nameSpoofer.playeruid}\` has been Kicked from the server for name spoofing.`,
-                                    nameSpoofer.originalName, nameSpoofer.steamid, nameSpoofer.playeruid);
+                                if (kickPlayerResponse.status === "success") {
+                                    await logToWhitelistLogChannel(client, guildId, serverName, "Whitelisted Player Caught Name Spoofing!",
+                                        `Player \`${nameSpoofer.originalName}\` caught Spoofing the Name: \`${nameSpoofer.name}\` with Steam ID \`${nameSpoofer.steamid}\` and UID \`${nameSpoofer.playeruid}\` has been Kicked from the server for name spoofing.`,
+                                        nameSpoofer.originalName, nameSpoofer.steamid, nameSpoofer.playeruid);
+                                }else {
+                                    await logToWhitelistLogChannel(client, guildId, serverName, "Failed to Kick Name Spoofing Player",
+                                        `Player \`${nameSpoofer.originalName}\` caught Spoofing the Name: \`${nameSpoofer.name}\` with Steam ID \`${nameSpoofer.steamid}\` and UID \`${nameSpoofer.playeruid}\` but cannot be kicked from the server.`,
+                                        nameSpoofer.originalName, nameSpoofer.steamid, nameSpoofer.playeruid);
+                                }
                             }
                         }
                     }else {

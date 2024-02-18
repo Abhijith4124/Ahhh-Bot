@@ -1,6 +1,7 @@
 const {getServerPlayersInfo, kickPlayer, banPlayer} = require("../../utils/palworld/palworldRCONWrapper");
 const {SlashCommandBuilder} = require("discord.js");
 const {PermissionFlagsBits} = require("discord-api-types/v10");
+const {banUser} = require("../../utils/palworld/userManager");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("banplayer")
@@ -23,7 +24,7 @@ module.exports = {
         let serverName = interaction.options.getString("server");
         let playerSteamId = interaction.options.getString("playersteamid");
 
-        await banPlayer(interaction, {
+        await banUser(interaction, {
             serverName: serverName,
             playerSteamId: playerSteamId
         });

@@ -48,8 +48,8 @@ async function handleModal(interaction) {
             return;
         }
 
-        const serverVersionResponse = serverInfoResponse.data.serverVersion;
-        const serverNameResponse = serverInfoResponse.data.serverName;
+        const serverVersionResponse = serverInfoResponse.serverInfo.serverVersion;
+        const serverNameResponse = serverInfoResponse.serverInfo.serverName;
 
         //Replace the Server Details
         guildPalServers.splice(guildPalServers.findIndex(server => server.serverName === serverName), 1, {
