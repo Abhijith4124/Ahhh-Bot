@@ -241,7 +241,7 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, config.serverPollingInterval);
+    }, config.statusUpdateInterval);
 
     //Another Faster Interval to track Whitelist and Join/Leave Message
     setInterval(async () => {
@@ -471,6 +471,6 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, config.discordLoggingInterval);
+    }, config.serverPollingInterval);
 }
 module.exports = {startRCONService}

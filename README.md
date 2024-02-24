@@ -75,10 +75,14 @@ Edit the config.json file in the root directory
   "debug": false,
   "token": "",
   "botApplicationId": "",
-  "customStatusMessage": ""
+  "customStatusMessage": "",
+  "statusUpdateInterval": 10000,
+  "serverPollingInterval": 5000
 }
 ```
+statusUpdateInterval: Interval for Updating Status Message in Discord.
 
+serverPollingInterval: Interval for polling the PalWorld Game Server to fetch new data.
 
 
 ## Installation and Deployment
