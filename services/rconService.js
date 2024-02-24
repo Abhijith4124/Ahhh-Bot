@@ -241,7 +241,7 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, 10000);
+    }, config.serverPollingInterval);
 
     //Another Faster Interval to track Whitelist and Join/Leave Message
     setInterval(async () => {
@@ -324,6 +324,9 @@ async function startRCONService(client, db) {
                     }
 
                     //Sorting Server Players
+                    const whitelistEnabledKey = `${guildId}_${serverName.replaceAll(" ", "_")}_PalServerWhitelistEnabled`;
+                    const whitelistEnabled = db.get(whitelistEnabledKey);
+
                     const whitelistedPlayersListKey = `${guildId}_${serverName.replaceAll(" ", "_")}_WhitelistedPlayerList`;
                     let whitelistedPlayers = db.get(whitelistedPlayersListKey);
 
@@ -343,16 +346,18 @@ async function startRCONService(client, db) {
                         const whitelistedPlayerData = whitelistedPlayers.find(whitelistedPlayer => whitelistedPlayer.steamid === serverPlayer.steamid
                             && whitelistedPlayer.playeruid === serverPlayer.playeruid);
 
-                        if (!whitelistedPlayerData) {
-                            //User Is not whitelisted
-                            nonWhitelistedPlayers.push(serverPlayer);
-                            continue;
-                        }
+                        if (whitelistEnabled) {
+                            if (!whitelistedPlayerData) {
+                                //User Is not whitelisted
+                                nonWhitelistedPlayers.push(serverPlayer);
+                                continue;
+                            }
 
-                        if (whitelistedPlayerData && whitelistedPlayerData.name !== serverPlayer.name) {
-                            //Player is Name Spoofing
-                            nameSpoofingPlayers.push({...serverPlayer, originalName: whitelistedPlayerData.name});
-                            continue;
+                            if (whitelistedPlayerData && whitelistedPlayerData.name !== serverPlayer.name) {
+                                //Player is Name Spoofing
+                                nameSpoofingPlayers.push({...serverPlayer, originalName: whitelistedPlayerData.name});
+                                continue;
+                            }
                         }
 
                         currentWhitelistedPlayers.push(serverPlayer);
@@ -376,33 +381,28 @@ async function startRCONService(client, db) {
                     serverData.currentPlayers = currentWhitelistedPlayers.length;
                     db.set(serverDataKey, serverData);
 
-                    /**
-                     *Whitelisted Player Name Checks were added later so to avoid every player from being non whitelisted
-                     * we've added an automatic data migration here.
-                     *
-                     * Players who are already using a spoofed account would get automatically migrated since they are whitelisted already.
-                     */
-
-                    let migratedWhitelistedPlayerList = [];
-                    for (const whitelistedPlayer of whitelistedPlayers) {
-                        if (!whitelistedPlayer.name) {
-                            const whitelistedPlayerCurrentData = currentWhitelistedPlayers
-                                .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid);
-
-                            if (whitelistedPlayerCurrentData) {
-                                whitelistedPlayer.name = whitelistedPlayerCurrentData.name;
-                            }
-                        }
-                        migratedWhitelistedPlayerList.push(whitelistedPlayer);
-                    }
-                    whitelistedPlayers = migratedWhitelistedPlayerList;
-                    db.set(whitelistedPlayersListKey, whitelistedPlayers);
-
-                    const whitelistEnabledKey = `${guildId}_${serverName.replaceAll(" ", "_")}_PalServerWhitelistEnabled`;
-                    const whitelistEnabled = db.get(whitelistEnabledKey);
-
-                    //Checking for Whitelist and showing only Whitelisted Players Join/Leave Messages
                     if (whitelistEnabled) {
+                        /**
+                         *Whitelisted Player Name Checks were added later so to avoid every player from being non whitelisted
+                         * we've added an automatic data migration here.
+                         *
+                         * Players who are already using a spoofed account would get automatically migrated since they are whitelisted already.
+                         */
+                        let migratedWhitelistedPlayerList = [];
+                        for (const whitelistedPlayer of whitelistedPlayers) {
+                            if (!whitelistedPlayer.name) {
+                                const whitelistedPlayerCurrentData = currentWhitelistedPlayers
+                                    .find(player => player.steamid === whitelistedPlayer.steamid && player.playeruid === whitelistedPlayer.playeruid);
+
+                                if (whitelistedPlayerCurrentData) {
+                                    whitelistedPlayer.name = whitelistedPlayerCurrentData.name;
+                                }
+                            }
+                            migratedWhitelistedPlayerList.push(whitelistedPlayer);
+                        }
+                        whitelistedPlayers = migratedWhitelistedPlayerList;
+                        db.set(whitelistedPlayersListKey, whitelistedPlayers);
+
                         if (config.debug) {
                             console.log(`[RCON Service]: Whitelist Enabled in Server ${serverName}... Checking for Whitelisted Players...`)
                         }
@@ -447,10 +447,6 @@ async function startRCONService(client, db) {
                                 }
                             }
                         }
-                    }else {
-                        if (config.debug) {
-                            console.log(`[RCON Service]: Whitelist Not Enabled in Server ${serverName}... Skipping Whitelist Checks...`)
-                        }
                     }
 
                     //Join/Leave Messages
@@ -475,6 +471,6 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, 5000);
+    }, config.discordLoggingInterval);
 }
 module.exports = {startRCONService}
