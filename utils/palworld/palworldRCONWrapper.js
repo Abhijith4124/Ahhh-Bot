@@ -103,7 +103,8 @@ async function kickPlayer(host, port, password, playerSteamId) {
         try {
             setTimeout(() => {
                 resolve({
-                    response: "failed"
+                    response: "failed",
+                    message: "Timeout"
                 });
             }, 2000);
 
@@ -115,20 +116,28 @@ async function kickPlayer(host, port, password, playerSteamId) {
 
             await rconClient.connect();
 
-            await rconClient.send(`KickPlayer ${playerSteamId}`);
+            let kickResponse= await rconClient.send(`KickPlayer ${playerSteamId}`);
             await rconClient.disconnect();
 
-            resolve({
-                status: "success",
-                message: `Successfully Kicked Player ${playerSteamId}`
-            });
+            if (kickResponse.includes(`Kicked: ${playerSteamId}`)) {
+                resolve({
+                    status: "success",
+                    message: `Successfully Kicked Player ${playerSteamId}`
+                });
+            }else {
+                resolve({
+                    status: "failed",
+                    message: "Server Failed to Kick Player"
+                })
+            }
         }catch (e) {
             if (config.debug) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
             resolve({
-                status: "failed"
+                status: "failed",
+                message: "Unexpected Error"
             });
         }
     });
@@ -139,7 +148,8 @@ async function banPlayer(host, port, password, playerSteamId) {
         try {
             setTimeout(() => {
                 resolve({
-                    response: "failed"
+                    response: "failed",
+                    message: "Timeout"
                 });
             }, 2000);
 
@@ -151,20 +161,28 @@ async function banPlayer(host, port, password, playerSteamId) {
 
             await rconClient.connect();
 
-            await rconClient.send(`BanPlayer ${playerSteamId}`);
+            let banResponse = await rconClient.send(`BanPlayer ${playerSteamId}`);
             await rconClient.disconnect();
 
-            resolve({
-                status: "success",
-                message: `Successfully Banned Player ${playerSteamId}`
-            });
+            if (banResponse.includes(`Baned: ${playerSteamId}`)) {
+                resolve({
+                    status: "success",
+                    message: `Successfully Banned Player ${playerSteamId}`
+                });
+            }else {
+                resolve({
+                    status: "failed",
+                    message: "Server Failed to Ban Player"
+                })
+            }
         }catch (e) {
             if (config.debug) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
             resolve({
-                status: "failed"
+                status: "failed",
+                message: "Unexpected Error"
             });
         }
     });

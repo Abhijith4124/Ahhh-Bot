@@ -103,7 +103,7 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
                         .setLabel("Ban Player")
                         .setStyle(ButtonStyle.Danger).setEmoji("🔨")
                 }else {
-                    actionButton.setLabel("").setDisabled(true);
+                    actionButton.setCustomId("disabledButton").setLabel("None").setStyle(ButtonStyle.Primary).setDisabled(true);
                 }
 
                 const actionRow = new ActionRowBuilder().addComponents(actionButton);
