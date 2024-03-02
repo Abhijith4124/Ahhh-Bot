@@ -2,8 +2,6 @@ const {EmbedBuilder} = require("discord.js");
 const {getServerPlayersInfo, kickPlayer, broadcastMessage} = require("../utils/palworld/palworldRCONWrapper");
 const {logToGameLogChannel, logToWhitelistLogChannel} = require("../utils/discord/logger");
 
-const config = require("../config.json");
-
 let firstRun = true;
 
 async function doFirstRun(client, db) {
@@ -12,14 +10,14 @@ async function doFirstRun(client, db) {
     //Populate Server Data on the First Run
     if (firstRun) {
         firstRun = false;
-        if (config.debug) {
+        if (process.env.DEBUG) {
             console.log(`[RCON Service]: First Run...`)
         }
 
         let palServers = db.get("PalServers");
 
         if (!palServers || palServers.length < 1) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON Service]: No PalServers Added for First Run. Skipping...`)
             }
             return;
@@ -67,7 +65,7 @@ async function doFirstRun(client, db) {
                         serverData.maximumPlayers = serverData.currentPlayers
                     }
                 } else {
-                    if (config.debug) {
+                    if (process.env.DEBUG) {
                         console.log(`[RCON Service]: Server ${serverName} is Offline during First Run. Setting Default Server Data...`);
                     }
                     serverData = defaultServerData;
@@ -87,14 +85,14 @@ async function startRCONService(client, db) {
     //Status Message
     setInterval(async () => {
         try {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON Service]: Updating Status...`)
             }
 
             let palServers = db.get("PalServers");
 
             if (!palServers || palServers.length < 1) {
-                if (config.debug) {
+                if (process.env.DEBUG) {
                     console.log(`[RCON Service]: Not Updating any Status since no servers are added...`)
                 }
                 return;
@@ -118,7 +116,7 @@ async function startRCONService(client, db) {
                     const statusChannelId = db.get(statusChannelKey);
 
                     if (!statusChannelId) {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: No Status Channel Set for Server ${serverName}  so skipping...`);
                         }
                         continue;
@@ -197,7 +195,7 @@ async function startRCONService(client, db) {
                     let statusMessageId = db.get(statusMessageIdKey);
 
                     if (statusMessageId) {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: Editing Status Message for Server ${serverName}...`)
                         }
 
@@ -213,21 +211,21 @@ async function startRCONService(client, db) {
                     }
 
                     if (!statusMessageEdited) {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: No Status Message Exist for Server ${serverName}, Creating New Status Message...`)
                         }
 
                         const statusChannel = await client.channels.cache.get(statusChannelId);
 
                         if (!client.guilds.cache.get(guildId)) {
-                            if (config.debug) {
+                            if (process.env.DEBUG) {
                                 console.log(`[RCON Service]: Failed to find Guild ${serverName}`);
                             }
                             continue;
                         }
 
                         if (!client.guilds.cache.get(guildId).members.me.permissionsIn(statusChannel).has("SendMessages")) {
-                            if (config.debug) {
+                            if (process.env.DEBUG) {
                                 console.log(`[RCON Service]: Permission Denied to Send Status Message to ${serverName}`);
                             }
                             continue;
@@ -241,19 +239,19 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, config.statusUpdateInterval);
+    }, process.env.STATUS_UPDATE_INTERVAL);
 
     //Another Faster Interval to track Whitelist and Join/Leave Message
     setInterval(async () => {
         try {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON Service]: Checking for Whitelist and Join/Leave Messages...`);
             }
 
             let palServers = db.get("PalServers");
 
             if (!palServers || palServers.length < 1) {
-                if (config.debug) {
+                if (process.env.DEBUG) {
                     console.log(`[RCON Service]: Skipping Server Check since no servers are added...`)
                 }
                 return;
@@ -304,7 +302,7 @@ async function startRCONService(client, db) {
                             serverData.maximumPlayers = serverData.currentPlayers
                         }
                     }else {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: Skipping Server Check since Server ${serverName} is offline...`);
                         }
 
@@ -317,7 +315,7 @@ async function startRCONService(client, db) {
                     db.set(serverDataKey, serverData);
 
                     if (serverData.currentPlayers < 1 && previousPlayersList.length < 1) {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: Skipping Server Check since no players are online in Server ${serverName}...`)
                         }
                         continue;
@@ -403,7 +401,7 @@ async function startRCONService(client, db) {
                         whitelistedPlayers = migratedWhitelistedPlayerList;
                         db.set(whitelistedPlayersListKey, whitelistedPlayers);
 
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: Whitelist Enabled in Server ${serverName}... Checking for Whitelisted Players...`)
                         }
 
@@ -462,7 +460,7 @@ async function startRCONService(client, db) {
                             await broadcastMessage(host, RCONPort, password, `${leftPlayer.name} has Left the Server!`);
                         }
                     }else {
-                        if (config.debug) {
+                        if (process.env.DEBUG) {
                             console.log(`[RCON Service]: No New Player Joined/Left the Server ${serverName} so skipping...`);
                         }
                     }
@@ -471,6 +469,6 @@ async function startRCONService(client, db) {
         }catch (e) {
             console.error(e);
         }
-    }, config.serverPollingInterval);
+    }, process.env.SERVER_POLLING_INTERVAL);
 }
 module.exports = {startRCONService}

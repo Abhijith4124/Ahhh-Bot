@@ -1,17 +1,29 @@
+require('dotenv').config()
 const fs = require('node:fs');
 const JSONdb = require('simple-json-db');
 const path = require('node:path');
 const { Client, Events, GatewayIntentBits, REST, Routes, Collection} = require('discord.js');
 
-const config = require('./config.json');
 const {startRCONService} = require("./services/rconService");
 const {cleanUp} = require("./utils/cleaner/cleaner");
 const {ActivityType} = require("discord-api-types/v10");
-const db = new JSONdb('./data/data.json');
 const logger = require('./utils/discord/logger');
 const {deleteCommandsFromGuild, deployCommandsToGuild} = require("./utils/discord/commandsDeploymentManager");
 
+const dbFolderPath = './data';
+const dbFilePath = './data/data.json';
+
 const CURRENT_BOT_VERSION = 1;
+
+//Create the Data JSON File if it does not exist
+if (!fs.existsSync(dbFolderPath)) {
+    fs.mkdirSync(dbFolderPath, {recursive: true});
+    if (!fs.existsSync(dbFilePath)) {
+        fs.writeFileSync(dbFilePath, "{}",)
+    }
+}
+
+const db = new JSONdb(dbFilePath);
 
 const client = new Client({
     intents: [
@@ -104,7 +116,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.on(Events.GuildCreate, (guild) => {
     deployCommandsToGuild(client, guild.id).then(() => {
-        if (config.debug) {
+        if (process.env.DEBUG) {
             console.log(`Deployed Commands to ${guild.name}`);
         }
     }).catch(e => {
@@ -118,7 +130,7 @@ client.once(Events.ClientReady, readyClient => {
     client.user.setActivity({
         type: ActivityType.Custom,
         name: "customstatus",
-        state: config.customStatusMessage
+        state: process.env.CUSTOM_STATUS_MESSAGE
     });
 
     if (!db.get(`BotVersion`)) {
@@ -143,4 +155,4 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 cleanUp(db);
-client.login(config.token);
+client.login(process.env.TOKEN);

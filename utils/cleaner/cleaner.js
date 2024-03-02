@@ -1,11 +1,9 @@
-const config = require("../../config.json");
-
 async function cleanUpServerData(db) {
     try {
         let palServers = db.get("PalServers");
 
         if (!palServers || palServers.length < 1) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[CleanUp]: Skipping Server Data Cleanup since no servers are added...`)
             }
             return;

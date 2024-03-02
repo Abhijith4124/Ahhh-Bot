@@ -1,17 +1,16 @@
 const {REST, Routes} = require("discord.js");
-const config = require("../../config.json");
 
 
-const rest = new REST().setToken(config.token);
+const rest = new REST().setToken(process.env.TOKEN);
 async function deployCommandsToGuild(client, guildId) {
     try {
-        if (config.debug) {
+        if (process.env.DEBUG) {
             console.log(`Started refreshing ${client.commands.size} application (/) commands.`);
         }
 
-        await rest.put(Routes.applicationGuildCommands(config.botApplicationId, guildId), { body: client.commands.map(command => command.data.toJSON()) });
+        await rest.put(Routes.applicationGuildCommands(process.env.BOT_APPLICATION_ID, guildId), { body: client.commands.map(command => command.data.toJSON()) });
 
-        if (config.debug) {
+        if (process.env.DEBUG) {
             console.log(`Deployed New Commands`)
         }
     }catch (e) {
@@ -21,8 +20,8 @@ async function deployCommandsToGuild(client, guildId) {
 
 async function deleteCommandsFromGuild(client, guildId) {
     try {
-        await rest.put(Routes.applicationGuildCommands(config.botApplicationId, guildId), { body: [] });
-        if (config.debug) {
+        await rest.put(Routes.applicationGuildCommands(process.env.BOT_APPLICATION_ID, guildId), { body: [] });
+        if (process.env.DEBUG) {
             console.log('Successfully deleted all application commands.')
         }
     }catch (e) {

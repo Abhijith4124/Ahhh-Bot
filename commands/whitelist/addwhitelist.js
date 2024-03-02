@@ -1,5 +1,4 @@
 const {SlashCommandBuilder, EmbedBuilder, TextInputBuilder, RoleSelectMenuBuilder, ActionRowBuilder, ModalBuilder} = require("discord.js");
-const config = require('../../config.json');
 const {PermissionFlagsBits} = require("discord-api-types/v10");
 const {whitelistPlayer} = require("../../utils/palworld/whitelistManager");
 
