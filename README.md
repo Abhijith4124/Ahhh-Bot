@@ -67,33 +67,55 @@ AhhhBot is designed to enhance your Palworld gaming experience by allowing you t
 - Ban Detected Players Instantly with just a click!
 
 
-## Config File
-Edit the config.json file in the root directory
+## ENV File
+(Skip if you are using Docker)
+Create a .env File in the root directory.
 
 ```
-{
-  "debug": false,
-  "token": "",
-  "botApplicationId": "",
-  "customStatusMessage": "",
-  "statusUpdateInterval": 10000,
-  "serverPollingInterval": 5000
-}
+DEBUG=false
+TOKEN=
+BOT_APPLICATION_ID=
+CUSTOM_STATUS_MESSAGE=
+STATUS_UPDATE_INTERVAL=10000
+SERVER_POLLING_INTERVAL=5000
 ```
-statusUpdateInterval: Interval for Updating Status Message in Discord.
+STATUS_UPDATE_INTERVAL: Interval for Updating Status Message in Discord.
 
-serverPollingInterval: Interval for polling the PalWorld Game Server to fetch new data.
+SERVER_POLLING_INTERVAL: Interval for polling the PalWorld Game Server to fetch new data.
 
 
 ## Installation and Deployment
 
-Install the NPM Packages using: 
+### Docker Method
+Run a Docker Container using:
+
+```
+docker container run \
+    --name ahhhbot \
+    -d \
+    -v <host_data_directory>:/app/data \
+    -e DEBUG=false \
+    -e TOKEN=<bot_token> \
+    -e BOT_APPLICATION_ID=<bot_application_id> \
+    -e CUSTOM_STATUS_MESSAGE="<custom_status_message>" \
+    -e STATUS_UPDATE_INTERVAL=10000 \
+    -e SERVER_POLLING_INTERVAL=5000 \
+    abhijith4124/ahhhbot:latest
+
+```
+Replace the values in <> with your own values.
+
+### Manual Method
+
+Clone the repo or Download the Source as Zip.
+
+Install the NPM Packages using:
 
 ```bash
   npm install
 ```
 
-To run the Discord bot just start it using NodeJs: 
+To run the Discord bot just start it using NodeJs:
 ```
 node index.js
 ```
