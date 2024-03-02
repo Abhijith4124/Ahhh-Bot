@@ -1,5 +1,4 @@
 const {EmbedBuilder, ActionRowBuilder, ButtonBuilder} = require("discord.js");
-const config = require("../../config.json");
 const {ButtonStyle, ComponentType} = require("discord-api-types/v10");
 const {whitelistPlayer} = require("../palworld/whitelistManager");
 const {banUser} = require("../palworld/userManager");
@@ -18,7 +17,7 @@ async function logToGameLogChannel(client, guild, serverName, title, message) {
 
         if (gameLogChannelId && client.guilds.cache.get(guild)) {
             if (!client.guilds.cache.get(guild).members.me.permissionsIn(gameLogChannelId).has("SendMessages")) {
-                if (config.debug) {
+                if (process.env.DEBUG) {
                     console.log(`[LOGGER]: Permission Denied to Log Game Logs to ${serverName}`);
                 }
                 return;
@@ -57,7 +56,7 @@ async function logToWhitelistLogChannel(client, guild, serverName, title, messag
         if (whitelistLogChannelId && client.guilds.cache.get(guild)) {
 
             if (!client.guilds.cache.get(guild).members.me.permissionsIn(whitelistLogChannelId).has("SendMessages")) {
-                if (config.debug) {
+                if (process.env.DEBUG) {
                     console.log(`[LOGGER]: Permission Denied to Log Whitelist Message to ${serverName}`);
                 }
                 return;

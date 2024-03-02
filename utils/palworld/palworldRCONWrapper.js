@@ -1,5 +1,4 @@
 const { Rcon } = require('minecraft-rcon-client')
-const config = require('../../config.json');
 
 async function getServerInfo(host, port, password) {
     return await new Promise(async (resolve) => {
@@ -41,7 +40,7 @@ async function getServerInfo(host, port, password) {
                 }
             });
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
@@ -87,7 +86,7 @@ async function getServerPlayersInfo(host, port, password) {
                 }
             });
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
@@ -131,7 +130,7 @@ async function kickPlayer(host, port, password, playerSteamId) {
                 })
             }
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
@@ -176,7 +175,7 @@ async function banPlayer(host, port, password, playerSteamId) {
                 })
             }
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
@@ -213,7 +212,7 @@ async function broadcastMessage(host, port, password, message) {
                 message: `Broadcasted Message: ${message}`
             }
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
@@ -249,7 +248,7 @@ async function saveServer(host, port, password) {
                 message: `Successfully Saved Server`
             });
         }catch (e) {
-            if (config.debug) {
+            if (process.env.DEBUG) {
                 console.log(`[RCON]: Error: ${e}`)
             }
 
