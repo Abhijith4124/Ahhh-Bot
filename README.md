@@ -100,7 +100,7 @@ docker container run \
     -e CUSTOM_STATUS_MESSAGE="<custom_status_message>" \
     -e STATUS_UPDATE_INTERVAL=10000 \
     -e SERVER_POLLING_INTERVAL=5000 \
-    abhijith4124/ahhhbot:latest
+    abhi4124/ahhhbot:latest
 
 ```
 Replace the values in <> with your own values.
